@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KumonGen · Português</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <style>
+        /* Mesmos estilos, copie do matematica.html */
+        /* ... */
+    </style>
+</head>
+<body class="bg-slate-900 font-sans antialiased overflow-hidden h-screen flex">
+<!-- SIDEBAR (similar, apenas muda título) -->
+<aside class="no-print w-80 bg-white shadow-2xl flex flex-col z-20 text-slate-800 overflow-y-auto">
+    <div class="p-6 bg-indigo-700 text-white">
+        <h1 class="text-xl font-black flex items-center gap-2">
+            <i class="fas fa-font"></i> KUMON·POR <span class="text-indigo-300 text-xs ml-1">v1</span>
+        </h1>
+        <p class="text-[10px] uppercase tracking-widest font-bold opacity-70">português</p>
+    </div>
+    <div class="flex-1 p-5 space-y-6">
+        <a href="index.html" class="text-xs text-indigo-600 hover:underline flex items-center gap-1"><i class="fas fa-arrow-left"></i> Início</a>
+        <div>
+            <label class="text-[10px] font-black text-slate-400 uppercase block mb-3">nível</label>
+            <div id="levelList" class="space-y-2 max-h-64 overflow-y-auto pr-1"></div>
+        </div>
+        <div>
+            <label class="text-[10px] font-black text-slate-400 uppercase block mb-3">visual</label>
+            <div class="bg-slate-50 p-3 rounded-xl space-y-3">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs">linhas/página</span>
+                    <select id="linesPerPage" class="border rounded px-2 py-1 text-xs">
+                        <option value="6">6</option>
+                        <option value="8" selected>8</option>
+                        <option value="10">10</option>
+                        <option value="12">12</option>
+                    </select>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-xs">zoom</span>
+                    <div class="flex items-center gap-2">
+                        <button onclick="adjustZoom(-0.1)" class="bg-white border w-6 h-6 rounded"><i class="fas fa-minus"></i></button>
+                        <span id="zoomValue" class="text-xs font-mono w-12 text-center">70%</span>
+                        <button onclick="adjustZoom(0.1)" class="bg-white border w-6 h-6 rounded"><i class="fas fa-plus"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div>
+            <label class="text-[10px] font-black text-slate-400 uppercase block mb-3">parâmetros</label>
+            <div id="paramPanel" class="bg-slate-50 p-3 rounded-xl min-h-[60px] text-xs"></div>
+        </div>
+        <div class="border-t border-slate-100 pt-4 space-y-2">
+            <button onclick="refreshPreview()" class="w-full flex items-center justify-center gap-2 bg-indigo-100 text-indigo-700 p-3 rounded-xl hover:bg-indigo-200 font-bold text-sm">
+                <i class="fas fa-sync-alt"></i> atualizar preview
+            </button>
+            <button onclick="generatePDF()" class="w-full flex items-center justify-center gap-2 bg-indigo-600 text-white p-4 rounded-xl hover:bg-indigo-700 shadow-lg font-black text-sm">
+                <i class="fas fa-file-pdf"></i> GERAR PDF
+            </button>
+        </div>
+        <div class="text-center text-[8px] text-slate-400 pt-4 border-t border-slate-100">
+            criado por Dario Hart · Free use 2026
+        </div>
+    </div>
+</aside>
+<main class="flex-1 overflow-auto bg-[#0F172A] flex items-start justify-center p-8 no-print" id="previewContainer">
+    <div id="zoomContainer" class="transition-transform duration-200 origin-top" style="transform:scale(0.7)">
+        <div id="a4-sheet" class="bg-white shadow-2xl flex relative">
+            <div class="dashed-center-line"></div>
+            <div id="pageLeft" class="page page-left"></div>
+            <div id="pageRight" class="page"></div>
+        </div>
+    </div>
+</main>
+
+<script>
+    const LevelLibrary = {
+        portugues: [
+            { id: 'p1', title: 'P1 · Alfabeto (traçado)', type: 'trace', letters: ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'], instruction: 'Cubra o pontilhado e treine a letra.' },
+            { id: 'p2', title: 'P2 · Sílabas simples', type: 'syllables', syllables: ['BA','BE','BI','BO','BU','CA','CE','CI','CO','CU','DA','DE','DI','DO','DU','FA','FE','FI','FO','FU','GA','GE','GI','GO','GU','JA','JE','JI','JO','JU','LA','LE','LI','LO','LU','MA','ME','MI','MO','MU','NA','NE','NI','NO','NU','PA','PE','PI','PO','PU','RA','RE','RI','RO','RU','SA','SE','SI','SO','SU','TA','TE','TI','TO','TU','VA','VE','VI','VO','VU','ZA','ZE','ZI','ZO','ZU'], instruction: 'Leia e copie as sílabas.' },
+            { id: 'p3', title: 'P3 · Palavras curtas (2 sílabas)', type: 'wordbuilding', words: [{ word: 'BOLA', parts: ['BO','LA'] },{ word: 'CASA', parts: ['CA','SA'] },{ word: 'DADO', parts: ['DA','DO'] },{ word: 'FOCA', parts: ['FO','CA'] },{ word: 'GATO', parts: ['GA','TO'] },{ word: 'JACA', parts: ['JA','CA'] },{ word: 'LIMA', parts: ['LI','MA'] },{ word: 'MALA', parts: ['MA','LA'] },{ word: 'NOVE', parts: ['NO','VE'] },{ word: 'PATO', parts: ['PA','TO'] },{ word: 'RATO', parts: ['RA','TO'] },{ word: 'SAPO', parts: ['SA','PO'] },{ word: 'TATU', parts: ['TA','TU'] },{ word: 'VACA', parts: ['VA','CA'] }], instruction: 'Junte as sílabas e escreva a palavra.' }
+        ]
+    };
+
+    let currentLevelId = 'p1';
+    let itemsPerPage = 8;
+    let currentZoom = 0.7;
+
+    function generateItemsForLevel(level) {
+        if (!level) return [];
+        let baseItems = [];
+        switch (level.type) {
+            case 'trace':
+                baseItems = level.letters.map(l => ({ type: 'trace', char: l }));
+                break;
+            case 'syllables':
+                baseItems = level.syllables.map(s => ({ type: 'syllable', syllable: s }));
+                break;
+            case 'wordbuilding':
+                baseItems = level.words.map(w => ({ type: 'word', word: w.word, parts: w.parts }));
+                break;
+            default:
+                return Array(itemsPerPage*2).fill({ type: 'unknown' });
+        }
+        const target = itemsPerPage * 2;
+        let result = [];
+        for (let i = 0; i < target; i++) {
+            result.push({ ...baseItems[i % baseItems.length] });
+        }
+        return result;
+    }
+
+    function updateParamPanel() {
+        paramPanel.innerHTML = '<div class="text-slate-400">Sem parâmetros adicionais.</div>';
+    }
+
+    function renderLevelList() {
+        const levels = LevelLibrary.portugues;
+        let html = '';
+        levels.forEach(lvl => {
+            const active = (lvl.id === currentLevelId) ? 'border-indigo-500 bg-indigo-50' : 'border-slate-100 hover:border-slate-200';
+            html += `<button onclick="selectLevel('${lvl.id}')" class="w-full text-left p-3 rounded-xl border-2 transition-all ${active}">
+                <div class="text-xs font-bold ${lvl.id === currentLevelId ? 'text-indigo-700' : 'text-slate-600'}">${lvl.title}</div>
+            </button>`;
+        });
+        levelListDiv.innerHTML = html;
+    }
+
+    window.selectLevel = function(id) {
+        currentLevelId = id;
+        renderLevelList();
+        updateParamPanel();
+        refreshPreview();
+    };
+
+    function refreshPreview() {
+        const level = LevelLibrary.portugues.find(l => l.id === currentLevelId);
+        if (!level) return;
+        const allItems = generateItemsForLevel(level);
+        const leftItems = allItems.slice(0, itemsPerPage);
+        const rightItems = allItems.slice(itemsPerPage, itemsPerPage*2);
+        buildPage(pageLeft, level, 1, leftItems);
+        buildPage(pageRight, level, 2, rightItems);
+    }
+
+    function init() {
+        initRefs();
+        renderLevelList();
+        updateParamPanel();
+        refreshPreview();
+        zoomSpan.innerText = Math.round(currentZoom*100)+'%';
+        zoomContainer.style.transform = `scale(${currentZoom})`;
+        document.getElementById('linesPerPage').addEventListener('change', e => {
+            itemsPerPage = parseInt(e.target.value);
+            refreshPreview();
+        });
+    }
+
+    init();
+</script>
+<script src="gerador.js"></script>
+</body>
+</html>
