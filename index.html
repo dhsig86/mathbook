@@ -3,25 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KumonGen · cadernos adaptados</title>
-    <!-- Tailwind (CDN) -->
+    <title>KumonGen · Clarice Playground</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- html2canvas + jsPDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <style>
-        /* Dimensões exatas da folha A4 paisagem */
+        /* Conversão: 1mm ≈ 3.78px, mas usaremos px para precisão no preview */
         #a4-sheet {
             background: white;
             box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            width: 297mm;
-            height: 210mm;
-            padding: 8mm 10mm;
+            width: 1123px;  /* 297mm * 3.78 = 1122.66, arredondado */
+            height: 794px;   /* 210mm * 3.78 = 793.8 */
+            padding: 0;
             box-sizing: border-box;
             position: relative;
             display: flex;
+            overflow: hidden;
         }
         @media print {
             body { background: white; }
@@ -36,29 +34,26 @@
             border-left: 2px dashed #cbd5e1;
             pointer-events: none;
         }
-        /* Estrutura de cada página (A5) */
         .page {
             width: 50%;
             height: 100%;
             display: flex;
             flex-direction: column;
+            padding: 30px 22px; /* 8mm ≈ 30px, 6mm ≈ 22px */
+            box-sizing: border-box;
         }
         .page-left {
-            padding-right: 6mm;
             border-right: 1px solid #e2e8f0;
         }
-        .page-right {
-            padding-left: 6mm;
-        }
-        /* Cabeçalho compacto */
         .page-header {
             display: flex;
             justify-content: space-between;
             align-items: start;
             border-bottom: 2px solid #1e293b;
-            padding-bottom: 2mm;
-            margin-bottom: 2mm;
+            padding-bottom: 7px; /* 2mm */
+            margin-bottom: 7px;
             font-size: 0.7rem;
+            flex-shrink: 0;
         }
         .page-header h3 {
             font-size: 1rem;
@@ -66,85 +61,90 @@
             line-height: 1.2;
             text-transform: uppercase;
             color: #0f172a;
+            margin: 0;
         }
         .page-header p {
             font-size: 0.5rem;
             font-weight: 700;
             color: #64748b;
             text-transform: uppercase;
-            max-width: 50mm;
+            max-width: 180px;
+            margin: 0;
         }
-        /* Grid de exercícios ocupa espaço flexível */
         .exercise-grid {
             flex: 1;
-            overflow: visible;
             display: flex;
             flex-direction: column;
-            gap: 1mm;
+            gap: 3px; /* 1mm ≈ 3.78px */
+            overflow: visible;
         }
-        /* Linha de exercício com altura fixa */
         .exercise-row {
             display: flex;
             align-items: center;
-            gap: 2mm;
+            gap: 7px; /* 2mm */
             border-bottom: 1px solid #e2e8f0;
-            padding-bottom: 1mm;
-            min-height: 8mm;
+            padding-bottom: 3px;
+            height: 26px; /* 7mm ≈ 26.5px, arredondado */
+            line-height: 26px;
+            box-sizing: border-box;
         }
         .exercise-number {
             font-size: 0.6rem;
             font-weight: 900;
             color: #cbd5e1;
-            width: 4mm;
+            width: 15px; /* 4mm ≈ 15px */
             text-align: right;
+            line-height: 26px;
         }
         .exercise-content {
             flex: 1;
             display: flex;
             align-items: center;
             flex-wrap: wrap;
-            gap: 2mm;
+            gap: 3px;
+            line-height: 26px;
         }
-        /* Rodapé simples (apenas página) */
         .page-footer {
             border-top: 1px solid #e2e8f0;
-            margin-top: 1mm;
-            padding-top: 1mm;
+            margin-top: 3px;
+            padding-top: 3px;
             display: flex;
             justify-content: flex-end;
             font-size: 0.6rem;
+            flex-shrink: 0;
         }
         .page-footer span {
             background-color: #0f172a;
             color: white;
-            padding: 1px 4px;
+            padding: 2px 6px;
             border-radius: 9999px;
             font-weight: 700;
         }
-        /* Elementos de resposta */
         .answer-line {
             border-bottom: 2px solid #1e293b;
-            min-width: 8mm;
-            height: 5mm;
+            min-width: 30px; /* 8mm */
+            height: 15px; /* 4mm */
             display: inline-block;
+            vertical-align: middle;
         }
         .trace-cell {
             border: 1px dashed #94a3b8;
             background: repeating-linear-gradient(45deg, #f8fafc, #f8fafc 4px, #f1f5f9 4px, #f1f5f9 8px);
-            width: 8mm;
-            height: 8mm;
+            width: 22px;
+            height: 22px;
         }
         .circle-placeholder {
-            width: 4mm;
-            height: 4mm;
+            width: 11px;  /* 3mm */
+            height: 11px;
             border: 1px solid #94a3b8;
             border-radius: 9999px;
             display: inline-block;
+            margin-right: 2px;
         }
         .tens-block {
             display: inline-block;
-            width: 4mm;
-            height: 4mm;
+            width: 11px;
+            height: 11px;
             border: 1px solid #94a3b8;
         }
         .tens-block.blue {
@@ -157,154 +157,46 @@
 </head>
 <body class="bg-slate-900 font-sans antialiased overflow-hidden h-screen flex">
 
-<!-- ======================================================================
-     BANCO DE DADOS CENTRAL (EXPANSÍVEL)
-     ====================================================================== -->
+<!-- BANCO DE DADOS (mesmo) -->
 <script>
 (function(){
     window.LevelLibrary = {
         portugues: [
-            { 
-                id: 'p1', 
-                title: 'P1 · Alfabeto (traçado)', 
-                type: 'trace', 
-                letters: ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'], 
-                instruction: 'Cubra o pontilhado e treine a letra.' 
-            },
-            { 
-                id: 'p2', 
-                title: 'P2 · Sílabas simples', 
-                type: 'syllables', 
-                syllables: [
-                    'BA','BE','BI','BO','BU','CA','CE','CI','CO','CU',
-                    'DA','DE','DI','DO','DU','FA','FE','FI','FO','FU',
-                    'GA','GE','GI','GO','GU','JA','JE','JI','JO','JU',
-                    'LA','LE','LI','LO','LU','MA','ME','MI','MO','MU',
-                    'NA','NE','NI','NO','NU','PA','PE','PI','PO','PU',
-                    'RA','RE','RI','RO','RU','SA','SE','SI','SO','SU',
-                    'TA','TE','TI','TO','TU','VA','VE','VI','VO','VU',
-                    'ZA','ZE','ZI','ZO','ZU'
-                ], 
-                instruction: 'Leia e copie as sílabas.' 
-            },
-            { 
-                id: 'p3', 
-                title: 'P3 · Palavras curtas (2 sílabas)', 
-                type: 'wordbuilding', 
-                words: [
-                    { word: 'BOLA', parts: ['BO','LA'] },
-                    { word: 'CASA', parts: ['CA','SA'] },
-                    { word: 'DADO', parts: ['DA','DO'] },
-                    { word: 'FOCA', parts: ['FO','CA'] },
-                    { word: 'GATO', parts: ['GA','TO'] },
-                    { word: 'JACA', parts: ['JA','CA'] },
-                    { word: 'LIMA', parts: ['LI','MA'] },
-                    { word: 'MALA', parts: ['MA','LA'] },
-                    { word: 'NOVE', parts: ['NO','VE'] },
-                    { word: 'PATO', parts: ['PA','TO'] },
-                    { word: 'RATO', parts: ['RA','TO'] },
-                    { word: 'SAPO', parts: ['SA','PO'] },
-                    { word: 'TATU', parts: ['TA','TU'] },
-                    { word: 'VACA', parts: ['VA','CA'] }
-                ],
-                instruction: 'Junte as sílabas e escreva a palavra.'
-            },
-            { 
-                id: 'p4', 
-                title: 'P4 · Palavras com 3 ou 4 sílabas', 
-                type: 'wordbuilding', 
-                words: [
-                    { word: 'BANANA', parts: ['BA','NA','NA'] },
-                    { word: 'CADEIRA', parts: ['CA','DEI','RA'] },
-                    { word: 'DINOSSAURO', parts: ['DI','NOS','SAU','RO'] },
-                    { word: 'FABRICA', parts: ['FA','BRI','CA'] },
-                    { word: 'GALINHA', parts: ['GA','LI','NHA'] },
-                    { word: 'JABUTI', parts: ['JA','BU','TI'] },
-                    { word: 'LARANJA', parts: ['LA','RAN','JA'] },
-                    { word: 'MADEIRA', parts: ['MA','DEI','RA'] },
-                    { word: 'NARIZ', parts: ['NA','RIZ'] },
-                    { word: 'PAPAGAIO', parts: ['PA','PA','GAI','O'] }
-                ],
-                instruction: 'Junte as sílabas e forme a palavra.'
-            }
+            { id: 'p1', title: 'P1 · Alfabeto (traçado)', type: 'trace', letters: ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'], instruction: 'Cubra o pontilhado e treine a letra.' },
+            { id: 'p2', title: 'P2 · Sílabas simples', type: 'syllables', syllables: ['BA','BE','BI','BO','BU','CA','CE','CI','CO','CU','DA','DE','DI','DO','DU','FA','FE','FI','FO','FU','GA','GE','GI','GO','GU','JA','JE','JI','JO','JU','LA','LE','LI','LO','LU','MA','ME','MI','MO','MU','NA','NE','NI','NO','NU','PA','PE','PI','PO','PU','RA','RE','RI','RO','RU','SA','SE','SI','SO','SU','TA','TE','TI','TO','TU','VA','VE','VI','VO','VU','ZA','ZE','ZI','ZO','ZU'], instruction: 'Leia e copie as sílabas.' },
+            { id: 'p3', title: 'P3 · Palavras curtas (2 sílabas)', type: 'wordbuilding', words: [{ word: 'BOLA', parts: ['BO','LA'] },{ word: 'CASA', parts: ['CA','SA'] },{ word: 'DADO', parts: ['DA','DO'] },{ word: 'FOCA', parts: ['FO','CA'] },{ word: 'GATO', parts: ['GA','TO'] },{ word: 'JACA', parts: ['JA','CA'] },{ word: 'LIMA', parts: ['LI','MA'] },{ word: 'MALA', parts: ['MA','LA'] },{ word: 'NOVE', parts: ['NO','VE'] },{ word: 'PATO', parts: ['PA','TO'] },{ word: 'RATO', parts: ['RA','TO'] },{ word: 'SAPO', parts: ['SA','PO'] },{ word: 'TATU', parts: ['TA','TU'] },{ word: 'VACA', parts: ['VA','CA'] }], instruction: 'Junte as sílabas e escreva a palavra.' },
+            { id: 'p4', title: 'P4 · Palavras com 3 ou 4 sílabas', type: 'wordbuilding', words: [{ word: 'BANANA', parts: ['BA','NA','NA'] },{ word: 'CADEIRA', parts: ['CA','DEI','RA'] },{ word: 'DINOSSAURO', parts: ['DI','NOS','SAU','RO'] },{ word: 'FABRICA', parts: ['FA','BRI','CA'] },{ word: 'GALINHA', parts: ['GA','LI','NHA'] },{ word: 'JABUTI', parts: ['JA','BU','TI'] },{ word: 'LARANJA', parts: ['LA','RAN','JA'] },{ word: 'MADEIRA', parts: ['MA','DEI','RA'] },{ word: 'NARIZ', parts: ['NA','RIZ'] },{ word: 'PAPAGAIO', parts: ['PA','PA','GAI','O'] }], instruction: 'Junte as sílabas e forme a palavra.' }
         ],
         matematica: [
-            {
-                id: 'm1',
-                title: 'M1 · Números 1 a 5 (quantidade)',
-                type: 'quantity',
-                numbers: [1,2,3,4,5],
-                instruction: 'Pinte a quantidade de círculos.'
-            },
-            {
-                id: 'm2',
-                title: 'M2 · Adição +1 (até 10)',
-                type: 'math',
-                operator: '+',
-                operand: 1,
-                range: [1,9],
-                instruction: 'Some e escreva o resultado.'
-            },
-            {
-                id: 'm3',
-                title: 'M3 · Complete a sequência (1-10)',
-                type: 'sequence',
-                sequences: [[1,2,'__',4,5],[5,6,7,'__',9],[8,'__',10],[2,3,'__',5]],
-                instruction: 'Escreva o número que falta.'
-            },
-            {
-                id: 'm4',
-                title: 'M4 · Dezena + unidade (11-19)',
-                type: 'tens',
-                numbers: [11,12,13,14,15,16,17,18,19],
-                instruction: 'Observe o grupo de 10 e as unidades.'
-            },
-            {
-                id: 'm5',
-                title: 'M5 · Comparação (maior/menor)',
-                type: 'compare',
-                pairs: [[3,5],[7,2],[4,4],[6,9],[1,8]],
-                instruction: 'Circule o número maior (ou igual).'
-            },
-            {
-                id: 'm6',
-                title: 'M6 · Adição +2 (até 20)',
-                type: 'math',
-                operator: '+',
-                operand: 2,
-                range: [1,18],
-                instruction: 'Continue somando 2.'
-            },
-            {
-                id: 'm7',
-                title: 'M7 · Números vizinhos (1-20)',
-                type: 'neighbors',
-                centers: [5,10,15,18],
-                instruction: 'Escreva o número que vem antes e depois.'
-            }
+            { id: 'm1', title: 'M1 · Números 1 a 5 (quantidade)', type: 'quantity', numbers: [1,2,3,4,5], instruction: 'Pinte a quantidade de círculos.' },
+            { id: 'm2', title: 'M2 · Adição +1 (até 10)', type: 'math', operator: '+', operand: 1, range: [1,9], instruction: 'Some e escreva o resultado.' },
+            { id: 'm3', title: 'M3 · Complete a sequência (1-10)', type: 'sequence', sequences: [[1,2,'__',4,5],[5,6,7,'__',9],[8,'__',10],[2,3,'__',5]], instruction: 'Escreva o número que falta.' },
+            { id: 'm4', title: 'M4 · Dezena + unidade (11-19)', type: 'tens', numbers: [11,12,13,14,15,16,17,18,19], instruction: 'Observe o grupo de 10 e as unidades.' },
+            { id: 'm5', title: 'M5 · Comparação (maior/menor)', type: 'compare', pairs: [[3,5],[7,2],[4,4],[6,9],[1,8]], instruction: 'Circule o número maior (ou igual).' },
+            { id: 'm6', title: 'M6 · Adição +2 (até 20)', type: 'math', operator: '+', operand: 2, range: [1,18], instruction: 'Continue somando 2.' },
+            { id: 'm7', title: 'M7 · Números vizinhos (1-20)', type: 'neighbors', centers: [5,10,15,18], instruction: 'Escreva o número que vem antes e depois.' }
         ]
     };
 
     window.APP_CONFIG = {
         itemsPerPage: 8,
         defaultZoom: 0.7,
-        subject: 'portugues',
-        selectedLevelId: 'p2'
+        subject: 'matematica',
+        selectedLevelId: 'm1'
     };
 })();
 </script>
 
-<!------------------------- SIDEBAR (com crédito no rodapé, não impresso) ------------------------->
+<!-- SIDEBAR -->
 <aside class="no-print w-80 bg-white shadow-2xl flex flex-col z-20 text-slate-800 overflow-y-auto">
     <div class="p-6 bg-indigo-700 text-white">
         <h1 class="text-xl font-black flex items-center gap-2">
-            <i class="fas fa-database"></i> KUMON·GEN <span class="text-indigo-300 text-xs ml-1">v9</span>
+            <i class="fas fa-database"></i> KUMON·GEN <span class="text-indigo-300 text-xs ml-1">v13</span>
         </h1>
         <p class="text-[10px] uppercase tracking-widest font-bold opacity-70">caderno sob medida</p>
     </div>
 
     <div class="flex-1 p-5 space-y-6">
-        <!-- matéria -->
         <div>
             <label class="text-[10px] font-black text-slate-400 uppercase block mb-3">1. área</label>
             <div class="flex p-1 bg-slate-100 rounded-xl">
@@ -316,14 +208,10 @@
                 </button>
             </div>
         </div>
-
-        <!-- níveis (sem tipo) -->
         <div>
             <label class="text-[10px] font-black text-slate-400 uppercase block mb-3">2. nível</label>
             <div id="levelList" class="space-y-2 max-h-64 overflow-y-auto pr-1"></div>
         </div>
-
-        <!-- ajustes -->
         <div>
             <label class="text-[10px] font-black text-slate-400 uppercase block mb-3">3. visual / repetição</label>
             <div class="bg-slate-50 p-3 rounded-xl space-y-3">
@@ -346,8 +234,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- ações -->
         <div class="border-t border-slate-100 pt-4 space-y-2">
             <button onclick="refreshPreview()" class="w-full flex items-center justify-center gap-2 bg-indigo-100 text-indigo-700 p-3 rounded-xl hover:bg-indigo-200 font-bold text-sm">
                 <i class="fas fa-sync-alt"></i> atualizar preview
@@ -356,32 +242,26 @@
                 <i class="fas fa-file-pdf"></i> GERAR PDF (A4 paisagem)
             </button>
         </div>
-        <!-- CRÉDITO NA SIDEBAR (NÃO IMPRIME) -->
         <div class="text-center text-[8px] text-slate-400 pt-4 border-t border-slate-100">
             criado por Dario Hart · Free use 2026
         </div>
     </div>
 </aside>
 
-<!-- preview principal (a4 sheet) -->
+<!-- PREVIEW -->
 <main class="flex-1 overflow-auto bg-[#0F172A] flex items-start justify-center p-8 no-print" id="previewContainer">
     <div id="zoomContainer" class="transition-transform duration-200 origin-top" style="transform:scale(0.7)">
         <div id="a4-sheet" class="bg-white shadow-2xl flex relative">
             <div class="dashed-center-line"></div>
-            <!-- página esquerda -->
             <div id="pageLeft" class="page page-left"></div>
-            <!-- página direita -->
-            <div id="pageRight" class="page page-right"></div>
+            <div id="pageRight" class="page"></div>
         </div>
     </div>
 </main>
 
-<!-- ======================================================================
-     LÓGICA PRINCIPAL (JAVASCRIPT)
-     ====================================================================== -->
+<!-- LÓGICA -->
 <script>
 (function() {
-    // ---------- referências ----------
     const pageLeft = document.getElementById('pageLeft');
     const pageRight = document.getElementById('pageRight');
     const levelListDiv = document.getElementById('levelList');
@@ -390,13 +270,11 @@
     const zoomContainer = document.getElementById('zoomContainer');
     const zoomSpan = document.getElementById('zoomValue');
 
-    // estado
     let currentSubject = APP_CONFIG.subject;
     let currentLevelId = APP_CONFIG.selectedLevelId;
     let currentZoom = APP_CONFIG.defaultZoom;
     let itemsPerPage = APP_CONFIG.itemsPerPage;
 
-    // ---------- funções auxiliares ----------
     window.adjustZoom = function(delta) {
         currentZoom = Math.min(1.2, Math.max(0.4, currentZoom + delta));
         zoomContainer.style.transform = `scale(${currentZoom})`;
@@ -438,7 +316,6 @@
         refreshPreview();
     };
 
-    // Geração de itens (cíclica para preencher exatamente itemsPerPage*2)
     function generateItemsForLevel(level) {
         if (!level) return [];
 
@@ -449,7 +326,6 @@
                 baseItems = level.numbers.map(n => ({ type: 'quantity', value: n }));
                 break;
             case 'math':
-                // matemática: gera aleatório
                 let items = [];
                 for (let i=0; i<itemsPerPage*2; i++) {
                     let a = Math.floor(Math.random() * (level.range[1] - level.range[0] + 1)) + level.range[0];
@@ -481,7 +357,6 @@
                 return Array(itemsPerPage*2).fill({ type: 'unknown' });
         }
 
-        // Preenche ciclicamente até o tamanho desejado
         const target = itemsPerPage * 2;
         let result = [];
         for (let i=0; i<target; i++) {
@@ -490,11 +365,9 @@
         return result;
     }
 
-    // Constrói uma página (esquerda ou direita)
     function buildPage(container, level, pageNum, items) {
-        container.innerHTML = ''; // limpa
+        container.innerHTML = '';
 
-        // Cabeçalho
         const header = document.createElement('div');
         header.className = 'page-header';
         header.innerHTML = `
@@ -504,7 +377,7 @@
             </div>
             <div class="text-right">
                 <div class="text-[0.4rem] font-bold text-slate-400">DATA: ___/___/___ TEMPO: ___ min</div>
-                <div class="border border-slate-900 px-2 py-0.5 mt-1 min-w-[30mm]">
+                <div class="border border-slate-900 px-2 py-0.5 mt-1 min-w-[110px]">
                     <span class="text-[0.4rem] font-bold">NOME:</span>
                     <span class="ml-2 text-[0.4rem]">____________________</span>
                 </div>
@@ -512,29 +385,24 @@
         `;
         container.appendChild(header);
 
-        // Grid de exercícios
         const grid = document.createElement('div');
         grid.className = 'exercise-grid';
         container.appendChild(grid);
 
-        // Rodapé (apenas número da página)
         const footer = document.createElement('div');
         footer.className = 'page-footer';
         footer.innerHTML = `<span>PÁG ${pageNum}</span>`;
         container.appendChild(footer);
 
-        // Preenche o grid com os itens
         items.forEach((item, idx) => {
             const row = document.createElement('div');
             row.className = 'exercise-row';
 
-            // Número
             const num = document.createElement('span');
             num.className = 'exercise-number';
             num.innerText = (idx+1);
             row.appendChild(num);
 
-            // Conteúdo
             const content = document.createElement('div');
             content.className = 'exercise-content';
 
@@ -597,33 +465,45 @@
         buildPage(pageRight, level, 2, rightItems);
     }
 
-    // Geração de PDF
     window.generatePDF = function() {
-        const element = document.getElementById('a4-sheet');
-        html2canvas(element, {
-            scale: 2.5,
-            backgroundColor: '#ffffff',
-            logging: false,
-            allowTaint: false,
-            useCORS: true
-        }).then((canvas) => {
-            const imgData = canvas.toDataURL('image/png');
-            const { jsPDF } = window.jspdf;
-            const pdf = new jsPDF({
-                orientation: 'landscape',
-                unit: 'mm',
-                format: 'a4'
+        const originalTransform = zoomContainer.style.transform;
+        zoomContainer.style.transform = 'scale(1)';
+
+        setTimeout(() => {
+            const element = document.getElementById('a4-sheet');
+            html2canvas(element, {
+                scale: 4,
+                backgroundColor: '#ffffff',
+                logging: false,
+                allowTaint: false,
+                useCORS: true,
+                windowWidth: 1123,
+                windowHeight: 794,
+                onclone: (clonedDoc) => {
+                    const sheet = clonedDoc.getElementById('a4-sheet');
+                    if (sheet) sheet.style.boxShadow = 'none';
+                }
+            }).then((canvas) => {
+                const imgData = canvas.toDataURL('image/png');
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF({
+                    orientation: 'landscape',
+                    unit: 'mm',
+                    format: 'a4'
+                });
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = pdf.internal.pageSize.getHeight();
+                pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
+                pdf.save(`kumon_${currentSubject}_${currentLevelId}.pdf`);
+
+                zoomContainer.style.transform = originalTransform;
+            }).catch(error => {
+                alert('Erro ao gerar PDF: ' + error);
+                zoomContainer.style.transform = originalTransform;
             });
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = pdf.internal.pageSize.getHeight();
-            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
-            pdf.save(`kumon_${currentSubject}_${currentLevelId}.pdf`);
-        }).catch(error => {
-            alert('Erro ao gerar PDF: ' + error);
-        });
+        }, 100);
     };
 
-    // Inicialização
     function init() {
         renderLevelList();
         switchSubject(currentSubject);
