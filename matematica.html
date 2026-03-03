@@ -4,12 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KumonGen · Matemática</title>
+    <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- html2canvas e jsPDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <!-- Estilos específicos (copiados do que já funcionava) -->
     <style>
-        /* ESTILOS EXATAMENTE IGUAIS AOS QUE JÁ FUNCIONAM */
+        /* EXATAMENTE OS MESMOS ESTILOS DA VERSÃO ANTERIOR */
         #a4-sheet {
             background: white;
             box-shadow: 0 10px 40px rgba(0,0,0,0.2);
@@ -145,7 +149,6 @@
         .tens-block.blue { background-color: #bfdbfe; }
         .tens-block.yellow { background-color: #fef08a; }
 
-        /* Estilos para os painéis de parâmetro */
         .param-control {
             display: flex;
             flex-direction: column;
@@ -181,530 +184,86 @@
 </head>
 <body class="bg-slate-900 font-sans antialiased overflow-hidden h-screen flex">
 
-<!-- SIDEBAR -->
-<aside class="no-print w-80 bg-white shadow-2xl flex flex-col z-20 text-slate-800 overflow-y-auto">
-    <div class="p-6 bg-indigo-700 text-white">
-        <h1 class="text-xl font-black flex items-center gap-2">
-            <i class="fas fa-calculator"></i> KUMON·MAT <span class="text-indigo-300 text-xs ml-1">v2</span>
-        </h1>
-        <p class="text-[10px] uppercase tracking-widest font-bold opacity-70">matemática personalizável</p>
-    </div>
-
-    <div class="flex-1 p-5 space-y-6">
-        <!-- Link voltar -->
-        <a href="index.html" class="text-xs text-indigo-600 hover:underline flex items-center gap-1"><i class="fas fa-arrow-left"></i> Início</a>
-
-        <!-- Níveis -->
-        <div>
-            <label class="text-[10px] font-black text-slate-400 uppercase block mb-3">nível</label>
-            <div id="levelList" class="space-y-2 max-h-64 overflow-y-auto pr-1"></div>
+    <!-- SIDEBAR -->
+    <aside class="no-print w-80 bg-white shadow-2xl flex flex-col z-20 text-slate-800 overflow-y-auto">
+        <div class="p-6 bg-indigo-700 text-white">
+            <h1 class="text-xl font-black flex items-center gap-2">
+                <i class="fas fa-calculator"></i> KUMON·MAT <span class="text-indigo-300 text-xs ml-1">v2</span>
+            </h1>
+            <p class="text-[10px] uppercase tracking-widest font-bold opacity-70">matemática personalizável</p>
         </div>
 
-        <!-- Visual / repetição -->
-        <div>
-            <label class="text-[10px] font-black text-slate-400 uppercase block mb-3">visual</label>
-            <div class="bg-slate-50 p-3 rounded-xl space-y-3">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs">linhas/página</span>
-                    <select id="linesPerPage" class="border rounded px-2 py-1 text-xs">
-                        <option value="6">6</option>
-                        <option value="8" selected>8</option>
-                        <option value="10">10</option>
-                        <option value="12">12</option>
-                    </select>
-                </div>
-                <div class="flex items-center justify-between">
-                    <span class="text-xs">zoom</span>
-                    <div class="flex items-center gap-2">
-                        <button onclick="adjustZoom(-0.1)" class="bg-white border w-6 h-6 rounded"><i class="fas fa-minus"></i></button>
-                        <span id="zoomValue" class="text-xs font-mono w-12 text-center">70%</span>
-                        <button onclick="adjustZoom(0.1)" class="bg-white border w-6 h-6 rounded"><i class="fas fa-plus"></i></button>
+        <div class="flex-1 p-5 space-y-6">
+            <!-- Link voltar ao index -->
+            <a href="index.html" class="text-xs text-indigo-600 hover:underline flex items-center gap-1">
+                <i class="fas fa-arrow-left"></i> Início
+            </a>
+
+            <!-- Níveis -->
+            <div>
+                <label class="text-[10px] font-black text-slate-400 uppercase block mb-3">nível</label>
+                <div id="levelList" class="space-y-2 max-h-64 overflow-y-auto pr-1"></div>
+            </div>
+
+            <!-- Visual / repetição -->
+            <div>
+                <label class="text-[10px] font-black text-slate-400 uppercase block mb-3">visual</label>
+                <div class="bg-slate-50 p-3 rounded-xl space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs">linhas/página</span>
+                        <select id="linesPerPage" class="border rounded px-2 py-1 text-xs">
+                            <option value="6">6</option>
+                            <option value="8" selected>8</option>
+                            <option value="10">10</option>
+                            <option value="12">12</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs">zoom</span>
+                        <div class="flex items-center gap-2">
+                            <button onclick="adjustZoom(-0.1)" class="bg-white border w-6 h-6 rounded"><i class="fas fa-minus"></i></button>
+                            <span id="zoomValue" class="text-xs font-mono w-12 text-center">70%</span>
+                            <button onclick="adjustZoom(0.1)" class="bg-white border w-6 h-6 rounded"><i class="fas fa-plus"></i></button>
+                        </div>
                     </div>
                 </div>
             </div>
+
+            <!-- Parâmetros -->
+            <div>
+                <label class="text-[10px] font-black text-slate-400 uppercase block mb-3">parâmetros</label>
+                <div id="paramPanel" class="bg-slate-50 p-3 rounded-xl min-h-[100px] text-xs"></div>
+            </div>
+
+            <!-- Ações -->
+            <div class="border-t border-slate-100 pt-4 space-y-2">
+                <button onclick="refreshPreview()" class="w-full flex items-center justify-center gap-2 bg-indigo-100 text-indigo-700 p-3 rounded-xl hover:bg-indigo-200 font-bold text-sm">
+                    <i class="fas fa-sync-alt"></i> atualizar preview
+                </button>
+                <button onclick="generatePDF()" class="w-full flex items-center justify-center gap-2 bg-indigo-600 text-white p-4 rounded-xl hover:bg-indigo-700 shadow-lg font-black text-sm">
+                    <i class="fas fa-file-pdf"></i> GERAR PDF
+                </button>
+            </div>
+
+            <div class="text-center text-[8px] text-slate-400 pt-4 border-t border-slate-100">
+                criado por Dario Hart · Free use 2026
+            </div>
         </div>
+    </aside>
 
-        <!-- Parâmetros dinâmicos -->
-        <div>
-            <label class="text-[10px] font-black text-slate-400 uppercase block mb-3">parâmetros</label>
-            <div id="paramPanel" class="bg-slate-50 p-3 rounded-xl min-h-[100px] text-xs"></div>
+    <!-- PREVIEW (A4 paisagem) -->
+    <main class="flex-1 overflow-auto bg-[#0F172A] flex items-start justify-center p-8 no-print" id="previewContainer">
+        <div id="zoomContainer" class="transition-transform duration-200 origin-top" style="transform:scale(0.7)">
+            <div id="a4-sheet" class="bg-white shadow-2xl flex relative">
+                <div class="dashed-center-line"></div>
+                <div id="pageLeft" class="page page-left"></div>
+                <div id="pageRight" class="page"></div>
+            </div>
         </div>
+    </main>
 
-        <!-- Ações -->
-        <div class="border-t border-slate-100 pt-4 space-y-2">
-            <button onclick="refreshPreview()" class="w-full flex items-center justify-center gap-2 bg-indigo-100 text-indigo-700 p-3 rounded-xl hover:bg-indigo-200 font-bold text-sm">
-                <i class="fas fa-sync-alt"></i> atualizar preview
-            </button>
-            <button onclick="generatePDF()" class="w-full flex items-center justify-center gap-2 bg-indigo-600 text-white p-4 rounded-xl hover:bg-indigo-700 shadow-lg font-black text-sm">
-                <i class="fas fa-file-pdf"></i> GERAR PDF
-            </button>
-        </div>
-        <div class="text-center text-[8px] text-slate-400 pt-4 border-t border-slate-100">
-            criado por Dario Hart · Free use 2026
-        </div>
-    </div>
-</aside>
-
-<!-- PREVIEW (A4 paisagem) -->
-<main class="flex-1 overflow-auto bg-[#0F172A] flex items-start justify-center p-8 no-print" id="previewContainer">
-    <div id="zoomContainer" class="transition-transform duration-200 origin-top" style="transform:scale(0.7)">
-        <div id="a4-sheet" class="bg-white shadow-2xl flex relative">
-            <div class="dashed-center-line"></div>
-            <div id="pageLeft" class="page page-left"></div>
-            <div id="pageRight" class="page"></div>
-        </div>
-    </div>
-</main>
-
-<!-- BANCO DE DADOS E LÓGICA ESPECÍFICA DA MATEMÁTICA -->
-<script>
-    // ---------- BANCO DE DADOS ----------
-    const LevelLibrary = {
-        matematica: [
-            { 
-                id: 'm1', 
-                title: 'M1 · Quantidade', 
-                type: 'quantity', 
-                numbers: [1,2,3,4,5], 
-                instruction: 'Pinte a quantidade de círculos.' 
-            },
-            { 
-                id: 'm2', 
-                title: 'M2 · Adição', 
-                type: 'math', 
-                operator: '+', 
-                operand: 1, 
-                range: [1,9], 
-                instruction: 'Resolva as adições.' 
-            },
-            { 
-                id: 'm3', 
-                title: 'M3 · Sequências', 
-                type: 'sequence', 
-                sequences: [[1,2,'__',4,5],[5,6,7,'__',9],[8,'__',10]], 
-                instruction: 'Complete a sequência.' 
-            },
-            { 
-                id: 'm4', 
-                title: 'M4 · Dezenas', 
-                type: 'tens', 
-                numbers: [11,12,13,14,15,16,17,18,19], 
-                instruction: 'Pinte os grupos de 10 e unidades.' 
-            },
-            { 
-                id: 'm5', 
-                title: 'M5 · Comparação', 
-                type: 'compare', 
-                pairs: [[3,5],[7,2],[4,4],[6,9]], 
-                instruction: 'Circule o maior (ou igual).' 
-            },
-            { 
-                id: 'm6', 
-                title: 'M6 · Subtração', 
-                type: 'math', 
-                operator: '-', 
-                operand: 1, 
-                range: [2,10], 
-                instruction: 'Resolva as subtrações.' 
-            },
-            { 
-                id: 'm7', 
-                title: 'M7 · Vizinhos', 
-                type: 'neighbors', 
-                centers: [5,10,15,18], 
-                instruction: 'Escreva o antes e depois.' 
-            }
-        ]
-    };
-
-    // ---------- ESTADO ----------
-    let currentLevelId = 'm2';
-    let itemsPerPage = 8;   // será sincronizado com o select
-    let currentZoom = 0.7;
-
-    // Parâmetros customizáveis (valores padrão)
-    let customParams = {
-        // quantity
-        qtyNumbers: [1,2,3,4,5],
-        qtyRepeat: 2,
-        // math
-        operator: '+',
-        operand: 1,
-        min: 1,
-        max: 9,
-        allowNegative: false,
-        // sequence
-        seqFixed: true,
-        seqStep: 1,
-        seqLength: 5,
-        seqCount: 4,
-        // tens
-        tensNumbers: [11,12,13,14,15,16,17,18,19],
-        // compare
-        compPairs: [[3,5],[7,2],[4,4],[6,9]],
-        compRandom: false,
-        compMin: 1,
-        compMax: 10,
-        compCount: 4,
-        // neighbors
-        neighborCenters: [5,10,15,18]
-    };
-
-    // ---------- FUNÇÕES DE GERAÇÃO DE ITENS POR TIPO ----------
-    function generateItemsForLevel(level) {
-        if (!level) return [];
-
-        let baseItems = [];
-
-        switch (level.type) {
-            case 'quantity':
-                // Usa customParams.qtyNumbers e repete
-                customParams.qtyNumbers.forEach(n => {
-                    for (let i = 0; i < customParams.qtyRepeat; i++) {
-                        baseItems.push({ type: 'quantity', value: n });
-                    }
-                });
-                break;
-
-            case 'math':
-                for (let i = 0; i < itemsPerPage * 2; i++) {
-                    let a = Math.floor(Math.random() * (customParams.max - customParams.min + 1)) + customParams.min;
-                    // Se subtração e allowNegative=false, garante que a >= operand
-                    if (customParams.operator === '-' && !customParams.allowNegative) {
-                        a = Math.max(a, customParams.operand);
-                    }
-                    baseItems.push({
-                        type: 'math',
-                        operand1: a,
-                        operator: customParams.operator,
-                        operand2: customParams.operand
-                    });
-                }
-                return baseItems; // já tem tamanho exato
-
-            case 'sequence':
-                if (customParams.seqFixed) {
-                    // usa as sequências pré-definidas do level
-                    baseItems = level.sequences.map(seq => ({ type: 'sequence', sequence: seq }));
-                } else {
-                    // gera sequências aleatórias
-                    for (let s = 0; s < customParams.seqCount; s++) {
-                        let start = Math.floor(Math.random() * 5) + 1; // início entre 1 e 5
-                        let seq = [];
-                        for (let j = 0; j < customParams.seqLength; j++) {
-                            if (j === 2) seq.push('__'); // buraco no meio
-                            else seq.push(start + j * customParams.seqStep);
-                        }
-                        baseItems.push({ type: 'sequence', sequence: seq });
-                    }
-                }
-                break;
-
-            case 'tens':
-                customParams.tensNumbers.forEach(n => {
-                    baseItems.push({ type: 'tens', number: n });
-                    baseItems.push({ type: 'tens', number: n }); // repete uma vez
-                });
-                break;
-
-            case 'compare':
-                if (customParams.compRandom) {
-                    for (let i = 0; i < customParams.compCount; i++) {
-                        let a = Math.floor(Math.random() * (customParams.compMax - customParams.compMin + 1)) + customParams.compMin;
-                        let b = Math.floor(Math.random() * (customParams.compMax - customParams.compMin + 1)) + customParams.compMin;
-                        baseItems.push({ type: 'compare', pair: [a, b] });
-                    }
-                } else {
-                    customParams.compPairs.forEach(p => {
-                        baseItems.push({ type: 'compare', pair: p });
-                    });
-                }
-                break;
-
-            case 'neighbors':
-                customParams.neighborCenters.forEach(c => {
-                    baseItems.push({ type: 'neighbors', center: c });
-                    baseItems.push({ type: 'neighbors', center: c });
-                });
-                break;
-
-            default:
-                return Array(itemsPerPage * 2).fill({ type: 'unknown' });
-        }
-
-        // Se baseItems não tiver o tamanho exato, completa ciclicamente
-        const target = itemsPerPage * 2;
-        if (baseItems.length === 0) return Array(target).fill({ type: 'unknown' });
-        let result = [];
-        for (let i = 0; i < target; i++) {
-            result.push({ ...baseItems[i % baseItems.length] });
-        }
-        return result;
-    }
-
-    // ---------- PAINEL DE PARÂMETROS DINÂMICO ----------
-    function updateParamPanel() {
-        const level = LevelLibrary.matematica.find(l => l.id === currentLevelId);
-        if (!level) return;
-
-        let html = '';
-
-        switch (level.type) {
-            case 'quantity':
-                html = `
-                    <div class="param-control">
-                        <div class="param-row">
-                            <label>Números (separados por vírgula):</label>
-                            <input type="text" id="qtyNumbers" value="${customParams.qtyNumbers.join(',')}" class="w-24">
-                        </div>
-                        <div class="param-row">
-                            <label>Repetições:</label>
-                            <input type="number" id="qtyRepeat" value="${customParams.qtyRepeat}" min="1" max="5" class="w-16">
-                        </div>
-                    </div>
-                `;
-                break;
-
-            case 'math':
-                html = `
-                    <div class="param-control">
-                        <div class="param-row">
-                            <label>Operador:</label>
-                            <select id="mathOperator">
-                                <option value="+" ${customParams.operator === '+' ? 'selected' : ''}>+</option>
-                                <option value="-" ${customParams.operator === '-' ? 'selected' : ''}>-</option>
-                            </select>
-                        </div>
-                        <div class="param-row">
-                            <label>Valor:</label>
-                            <input type="number" id="mathOperand" value="${customParams.operand}" min="1" max="20" class="w-16">
-                        </div>
-                        <div class="param-row">
-                            <label>Mínimo:</label>
-                            <input type="number" id="mathMin" value="${customParams.min}" min="1" max="50" class="w-16">
-                        </div>
-                        <div class="param-row">
-                            <label>Máximo:</label>
-                            <input type="number" id="mathMax" value="${customParams.max}" min="1" max="50" class="w-16">
-                        </div>
-                        <div class="param-row checkbox-row">
-                            <label>Permitir negativo (subtração)?</label>
-                            <input type="checkbox" id="mathAllowNegative" ${customParams.allowNegative ? 'checked' : ''}>
-                        </div>
-                    </div>
-                `;
-                break;
-
-            case 'sequence':
-                html = `
-                    <div class="param-control">
-                        <div class="param-row checkbox-row">
-                            <label>Usar sequências fixas</label>
-                            <input type="checkbox" id="seqFixed" ${customParams.seqFixed ? 'checked' : ''}>
-                        </div>
-                        <div class="param-row">
-                            <label>Passo (se aleatório):</label>
-                            <input type="number" id="seqStep" value="${customParams.seqStep}" min="1" max="5" class="w-16">
-                        </div>
-                        <div class="param-row">
-                            <label>Comprimento:</label>
-                            <input type="number" id="seqLength" value="${customParams.seqLength}" min="3" max="7" class="w-16">
-                        </div>
-                        <div class="param-row">
-                            <label>Quantidade (se aleatório):</label>
-                            <input type="number" id="seqCount" value="${customParams.seqCount}" min="2" max="8" class="w-16">
-                        </div>
-                    </div>
-                `;
-                break;
-
-            case 'tens':
-                html = `
-                    <div class="param-control">
-                        <div class="param-row">
-                            <label>Números (ex: 11,12,13...):</label>
-                            <input type="text" id="tensNumbers" value="${customParams.tensNumbers.join(',')}" class="w-32">
-                        </div>
-                    </div>
-                `;
-                break;
-
-            case 'compare':
-                html = `
-                    <div class="param-control">
-                        <div class="param-row checkbox-row">
-                            <label>Gerar aleatório</label>
-                            <input type="checkbox" id="compRandom" ${customParams.compRandom ? 'checked' : ''}>
-                        </div>
-                        <div class="param-row">
-                            <label>Pares fixos (ex: 3,5;7,2):</label>
-                            <input type="text" id="compPairs" value="${customParams.compPairs.map(p => p.join(',')).join(';')}" class="w-32">
-                        </div>
-                        <div class="param-row">
-                            <label>Mín (aleatório):</label>
-                            <input type="number" id="compMin" value="${customParams.compMin}" min="1" max="20" class="w-16">
-                        </div>
-                        <div class="param-row">
-                            <label>Máx (aleatório):</label>
-                            <input type="number" id="compMax" value="${customParams.compMax}" min="1" max="20" class="w-16">
-                        </div>
-                        <div class="param-row">
-                            <label>Quantidade (aleatório):</label>
-                            <input type="number" id="compCount" value="${customParams.compCount}" min="2" max="10" class="w-16">
-                        </div>
-                    </div>
-                `;
-                break;
-
-            case 'neighbors':
-                html = `
-                    <div class="param-control">
-                        <div class="param-row">
-                            <label>Centros (ex: 5,10,15):</label>
-                            <input type="text" id="neighborCenters" value="${customParams.neighborCenters.join(',')}" class="w-32">
-                        </div>
-                    </div>
-                `;
-                break;
-
-            default:
-                html = '<div class="text-slate-400">Sem parâmetros adicionais.</div>';
-        }
-
-        paramPanel.innerHTML = html;
-
-        // Anexa eventos para atualizar customParams (apenas para campos existentes)
-        // (serão chamados quando o usuário interagir; o refreshPreview usará os valores atuais)
-        attachParamEvents(level.type);
-    }
-
-    function attachParamEvents(type) {
-        // Para cada tipo, adiciona listeners que atualizam customParams
-        // Isso é feito de forma simples: ao mudar, atualiza a variável.
-        // Mas cuidado com parsing de arrays.
-        setTimeout(() => { // espera DOM ser atualizado
-            if (type === 'quantity') {
-                const inpNumbers = document.getElementById('qtyNumbers');
-                const inpRepeat = document.getElementById('qtyRepeat');
-                if (inpNumbers) inpNumbers.addEventListener('change', (e) => {
-                    customParams.qtyNumbers = e.target.value.split(',').map(Number).filter(n => !isNaN(n));
-                });
-                if (inpRepeat) inpRepeat.addEventListener('change', (e) => {
-                    customParams.qtyRepeat = parseInt(e.target.value) || 2;
-                });
-            }
-            if (type === 'math') {
-                const op = document.getElementById('mathOperator');
-                const operand = document.getElementById('mathOperand');
-                const min = document.getElementById('mathMin');
-                const max = document.getElementById('mathMax');
-                const allowNeg = document.getElementById('mathAllowNegative');
-                if (op) op.addEventListener('change', (e) => customParams.operator = e.target.value);
-                if (operand) operand.addEventListener('change', (e) => customParams.operand = parseInt(e.target.value) || 1);
-                if (min) min.addEventListener('change', (e) => customParams.min = parseInt(e.target.value) || 1);
-                if (max) max.addEventListener('change', (e) => customParams.max = parseInt(e.target.value) || 1);
-                if (allowNeg) allowNeg.addEventListener('change', (e) => customParams.allowNegative = e.target.checked);
-            }
-            if (type === 'sequence') {
-                const fixed = document.getElementById('seqFixed');
-                const step = document.getElementById('seqStep');
-                const len = document.getElementById('seqLength');
-                const cnt = document.getElementById('seqCount');
-                if (fixed) fixed.addEventListener('change', (e) => customParams.seqFixed = e.target.checked);
-                if (step) step.addEventListener('change', (e) => customParams.seqStep = parseInt(e.target.value) || 1);
-                if (len) len.addEventListener('change', (e) => customParams.seqLength = parseInt(e.target.value) || 5);
-                if (cnt) cnt.addEventListener('change', (e) => customParams.seqCount = parseInt(e.target.value) || 4);
-            }
-            if (type === 'tens') {
-                const tens = document.getElementById('tensNumbers');
-                if (tens) tens.addEventListener('change', (e) => {
-                    customParams.tensNumbers = e.target.value.split(',').map(Number).filter(n => n >= 11 && n <= 19);
-                });
-            }
-            if (type === 'compare') {
-                const random = document.getElementById('compRandom');
-                const pairs = document.getElementById('compPairs');
-                const min = document.getElementById('compMin');
-                const max = document.getElementById('compMax');
-                const cnt = document.getElementById('compCount');
-                if (random) random.addEventListener('change', (e) => customParams.compRandom = e.target.checked);
-                if (pairs) pairs.addEventListener('change', (e) => {
-                    // formato "3,5;7,2;4,4"
-                    customParams.compPairs = e.target.value.split(';').map(part => part.split(',').map(Number)).filter(p => p.length === 2);
-                });
-                if (min) min.addEventListener('change', (e) => customParams.compMin = parseInt(e.target.value) || 1);
-                if (max) max.addEventListener('change', (e) => customParams.compMax = parseInt(e.target.value) || 1);
-                if (cnt) cnt.addEventListener('change', (e) => customParams.compCount = parseInt(e.target.value) || 4);
-            }
-            if (type === 'neighbors') {
-                const centers = document.getElementById('neighborCenters');
-                if (centers) centers.addEventListener('change', (e) => {
-                    customParams.neighborCenters = e.target.value.split(',').map(Number).filter(n => !isNaN(n));
-                });
-            }
-        }, 50);
-    }
-
-    // ---------- RENDERIZAÇÃO DA LISTA DE NÍVEIS ----------
-    function renderLevelList() {
-        const levels = LevelLibrary.matematica;
-        let html = '';
-        levels.forEach(lvl => {
-            const active = (lvl.id === currentLevelId) ? 'border-indigo-500 bg-indigo-50' : 'border-slate-100 hover:border-slate-200';
-            html += `<button onclick="selectLevel('${lvl.id}')" class="w-full text-left p-3 rounded-xl border-2 transition-all ${active}">
-                <div class="text-xs font-bold ${lvl.id === currentLevelId ? 'text-indigo-700' : 'text-slate-600'}">${lvl.title}</div>
-            </button>`;
-        });
-        levelListDiv.innerHTML = html;
-    }
-
-    window.selectLevel = function(id) {
-        currentLevelId = id;
-        renderLevelList();
-        updateParamPanel();
-        refreshPreview();
-    };
-
-    // ---------- REFRESH PREVIEW ----------
-    function refreshPreview() {
-        const level = LevelLibrary.matematica.find(l => l.id === currentLevelId);
-        if (!level) return;
-
-        const allItems = generateItemsForLevel(level);
-        const leftItems = allItems.slice(0, itemsPerPage);
-        const rightItems = allItems.slice(itemsPerPage, itemsPerPage * 2);
-
-        buildPage(pageLeft, level, 1, leftItems);
-        buildPage(pageRight, level, 2, rightItems);
-    }
-
-    // ---------- INICIALIZAÇÃO ----------
-    function init() {
-        initRefs(); // do gerador.js
-        renderLevelList();
-        updateParamPanel();
-        refreshPreview();
-        zoomSpan.innerText = Math.round(currentZoom * 100) + '%';
-        zoomContainer.style.transform = `scale(${currentZoom})`;
-
-        // Sincroniza itemsPerPage com o select
-        document.getElementById('linesPerPage').addEventListener('change', (e) => {
-            itemsPerPage = parseInt(e.target.value);
-            refreshPreview();
-        });
-    }
-
-    // Expõe funções necessárias no escopo global
-    window.adjustZoom = adjustZoom;
-    window.generatePDF = generatePDF;
-    window.refreshPreview = refreshPreview;
-
-    // Inicia tudo
-    init();
-</script>
-
-<!-- Inclui o gerador.js (deve estar no mesmo diretório) -->
-<script src="gerador.js"></script>
-
+    <!-- Scripts -->
+    <script src="gerador.js"></script>
+    <script src="matematica.js"></script>
 </body>
 </html>
