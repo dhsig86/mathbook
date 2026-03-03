@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KumonGen · Inglês</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <style>/* mesmo estilo */</style>
+</head>
+<body class="bg-slate-900 font-sans antialiased overflow-hidden h-screen flex">
+<!-- sidebar similar, com ícone de language -->
+<aside class="no-print w-80 bg-white shadow-2xl flex flex-col z-20 text-slate-800 overflow-y-auto">
+    <div class="p-6 bg-indigo-700 text-white">
+        <h1 class="text-xl font-black flex items-center gap-2">
+            <i class="fas fa-language"></i> KUMON·ENG <span class="text-indigo-300 text-xs ml-1">v1</span>
+        </h1>
+        <p class="text-[10px] uppercase tracking-widest font-bold opacity-70">inglês básico</p>
+    </div>
+    <div class="flex-1 p-5 space-y-6">
+        <a href="index.html" class="text-xs text-indigo-600 hover:underline flex items-center gap-1"><i class="fas fa-arrow-left"></i> Início</a>
+        <div>
+            <label class="text-[10px] font-black text-slate-400 uppercase block mb-3">nível</label>
+            <div id="levelList" class="space-y-2 max-h-64 overflow-y-auto pr-1"></div>
+        </div>
+        <div> ... controles de zoom e linhas ... </div>
+        <div> ... parâmetros (talvez none) ... </div>
+        <div> ... botões ... </div>
+        <div class="text-center text-[8px] text-slate-400 pt-4 border-t border-slate-100">
+            criado por Dario Hart · Free use 2026
+        </div>
+    </div>
+</aside>
+<main>... preview ...</main>
+
+<script>
+    const LevelLibrary = {
+        ingles: [
+            { id: 'i1', title: 'I1 · Alphabet (trace)', type: 'trace', letters: ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'], instruction: 'Trace the letters.' },
+            { id: 'i2', title: 'I2 · Simple words', type: 'wordbuilding', words: [
+                { word: 'CAT', parts: ['C','A','T'] },
+                { word: 'DOG', parts: ['D','O','G'] },
+                { word: 'SUN', parts: ['S','U','N'] },
+                { word: 'CAR', parts: ['C','A','R'] }
+            ], instruction: 'Put the letters together.' }
+        ]
+    };
+    // Lógica similar ao português, usando os mesmos tipos (trace, wordbuilding)
+    let currentLevelId = 'i1';
+    let itemsPerPage = 8;
+    let currentZoom = 0.7;
+
+    function generateItemsForLevel(level) {
+        // igual ao português
+    }
+    // ... demais funções
+    function init() { ... }
+    init();
+</script>
+<script src="gerador.js"></script>
+</body>
+</html>
