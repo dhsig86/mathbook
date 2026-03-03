@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Engenheiro de Cadernos - Método Kumon</title>
+
+    <!-- Chosen Palette: Master Professional (Slate-900 Sidebar, Sky-600 Math, Rose-500 Port, White Canvas) -->
+
+    <!-- Application Structure Plan: 
+    1. Arquitetura de Engenharia: A barra lateral agora é dividida em "Configurações Globais", "Painel de Controle de Disciplina" e "Ajustes de Layout".
+    2. Motor de Customização Matemática: Permite definir o número inicial, o incremento (passo) e a operação.
+    3. Motor de Customização de Linguagem: Permite inserir uma lista personalizada de palavras ou sílabas para treino de caligrafia e reconhecimento.
+    4. Sistema de Visualização Real-Time: O "Canvas" central reflete as mudanças instantaneamente.
+    5. Protocolo de Impressão: CSS @media print rigoroso para forçar o layout A4 Paisagem sem elementos de UI.
+    -->
+
+    <!-- Visualization & Content Choices: 
+    - Matemática: Sistema de "Sequência Lógica" onde o usuário define o desafio (ex: começar no 10, pular de 2 em 2).
+    - Português: Área de texto livre para "Engenharia de Palavras", transformando qualquer entrada em exercícios de tracejado ou cópia.
+    - Layout: Duas colunas A5 (Pág 1 e Pág 2) com cabeçalhos de cronometragem padrão Kumon.
+    -->
+
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Short+Stack&family=Montserrat:wght@600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --a4-width: 297mm;
+            --a4-height: 210mm;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+        }
+
+        .kids-font {
+            font-family: 'Short Stack', cursive;
+        }
+
+        .brand-font {
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        /* CONFIGURAÇÃO DE IMPRESSÃO */
+        @media print {
+            @page {
+                size: A4 landscape;
+                margin: 0;
+            }
+            body {
+                background: white !important;
+                margin: 0;
+                padding: 0;
+            }
+            .no-print {
+                display: none !important;
+            }
+            #app-layout {
+                display: block !important;
+                width: var(--a4-width);
+                height: var(--a4-height);
+            }
+            #print-canvas {
+                display: flex !important;
+                width: var(--a4-width);
+                height: var(--a4-height);
+                box-shadow: none !important;
+                border: none !important;
+            }
+            .page-a5 {
+                width: 50% !important;
+                height: 100% !important;
+                padding: 12mm !important;
+                box-sizing: border-box;
+                border: none !important;
+                border-right: 1px dashed #ddd !important; /* Linha de dobra */
+            }
+            .page-a5:last-child {
+                border-right: none !important;
+            }
+        }
+
+        /* INTERFACE EM TELA */
+        .preview-frame {
+            width: 100%;
+            max-width: 1100px;
+            aspect-ratio: 297 / 210;
+            background: white;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            display: flex;
+            margin: 0 auto;
+            border: 1px solid #e2e8f0;
+            position: relative;
+        }
+
+        .page-a5 {
+            flex: 1;
+            padding: 2.5rem;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px dashed #cbd5e1;
+            overflow: hidden;
+        }
+
+        .page-a5:last-child {
+            border-right: none;
+        }
+
+        /* Estilo dos Exercícios */
+        .item-row {
+            border-bottom: 1px solid #f1f5f9;
+            padding: 12px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .writing-box {
+            width: 90px;
+            height: 50px;
+            border: 2px solid #94a3b8;
+            border-radius: 6px;
+            background: #fff;
+        }
+
+        .trace-preview {
+            color: #e2e8f0;
+            font-size: 2.5rem;
+            font-weight: bold;
+            letter-spacing: 4px;
+        }
+
+        .active-subject-tab {
+            background-color: #ffffff;
+            color: #0f172a;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col xl:flex-row">
+
+    <!-- Sidebar de Engenharia (no-print) -->
+    <aside class="no-print w-full xl:w-96 bg-slate-900 text-white p-6 shrink-0 z-20 shadow-2xl overflow-y-auto max-h-screen">
+        <div class="mb-8 flex items-center gap-3">
+            <div class="bg-blue-500 p-2 rounded-lg text-2xl">⚙️</div>
+            <div>
+                <h1 class="text-xl font-bold brand-font leading-tight">Engenheiro de Cadernos</h1>
+                <p class="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Personalização Profissional</p>
+            </div>
+        </div>
+
+        <!-- Seletor de Disciplina -->
+        <div class="bg-slate-800 p-1 rounded-xl flex mb-8">
+            <button onclick="changeSubject('math')" id="tab-math" class="flex-1 py-2 text-sm font-bold rounded-lg active-subject-tab transition-all">Matemática</button>
+            <button onclick="changeSubject('port')" id="tab-port" class="flex-1 py-2 text-sm font-bold rounded-lg text-slate-400 hover:text-white transition-all">Português</button>
+        </div>
+
+        <div class="space-y-8">
+            <!-- Configurações Globais -->
+            <section>
+                <h2 class="text-xs font-bold text-slate-500 uppercase mb-4 flex items-center gap-2">
+                    <span>👤</span> Dados do Aluno
+                </h2>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="col-span-2">
+                        <input type="text" id="cfg-name" placeholder="Nome da Criança" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none" oninput="render()">
+                    </div>
+                    <div>
+                        <label class="text-[10px] text-slate-500 block mb-1">Caderno Nº</label>
+                        <input type="number" id="cfg-book-num" value="1" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-sm outline-none" oninput="render()">
+                    </div>
+                    <div>
+                        <label class="text-[10px] text-slate-500 block mb-1">Qtd. Itens</label>
+                        <input type="number" id="cfg-items" value="7" min="1" max="10" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-sm outline-none" oninput="render()">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Painel Engenheiro: Matemática -->
+            <section id="panel-math" class="block space-y-4">
+                <h2 class="text-xs font-bold text-slate-500 uppercase mb-4 flex items-center gap-2">
+                    <span>🔢</span> Engenharia de Números
+                </h2>
+                
+                <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50 space-y-4">
+                    <div>
+                        <label class="text-xs text-slate-300 block mb-2">Modo de Operação</label>
+                        <select id="math-mode" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-sm outline-none" onchange="render()">
+                            <option value="tracing">Tracejado Estruturado</option>
+                            <option value="addition">Adição Customizada (+)</option>
+                            <option value="subtraction">Subtração Customizada (-)</option>
+                            <option value="sequence">Sequência Lógica (?)</option>
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-[10px] text-slate-500 block mb-1">Início da Série</label>
+                            <input type="number" id="math-start" value="1" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-sm outline-none" oninput="render()">
+                        </div>
+                        <div>
+                            <label class="text-[10px] text-slate-500 block mb-1">Passo / Salto</label>
+                            <input type="number" id="math-step" value="1" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-sm outline-none" oninput="render()">
+                        </div>
+                    </div>
+
+                    <div id="math-op-val-container" class="hidden">
+                        <label class="text-[10px] text-slate-500 block mb-1">Valor da Operação (ex: +2)</label>
+                        <input type="number" id="math-op-val" value="1" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-sm outline-none" oninput="render()">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Painel Engenheiro: Português -->
+            <section id="panel-port" class="hidden space-y-4">
+                <h2 class="text-xs font-bold text-slate-500 uppercase mb-4 flex items-center gap-2">
+                    <span>✍️</span> Engenharia de Texto
+                </h2>
+                
+                <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50 space-y-4">
+                    <div>
+                        <label class="text-xs text-slate-300 block mb-2">Objetivo da Lição</label>
+                        <select id="port-mode" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-sm outline-none" onchange="render()">
+                            <option value="trace">Tracejado de Apoio</option>
+                            <option value="copy">Cópia e Memorização</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="text-[10px] text-slate-500 block mb-1">Palavras / Sílabas (Separe por vírgula)</label>
+                        <textarea id="port-content" rows="4" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-sm outline-none resize-none" placeholder="Ex: BOLA, CASA, DADO, GATO" oninput="render()">BOLA, CASA, DADO, GATO, MESA, SAPO, VACA</textarea>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Botão de Ação -->
+            <div class="pt-4 border-t border-slate-800">
+                <button onclick="handlePrint()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 px-4 rounded-xl shadow-xl flex items-center justify-center gap-3 transition-all transform hover:-translate-y-1 active:scale-95">
+                    <span class="text-xl">🖨️</span> Gerar e Imprimir
+                </button>
+                <p class="text-[10px] text-center text-slate-500 mt-4 leading-relaxed">
+                    O PDF será gerado em formato de livreto.<br>Dobre o papel A4 ao meio após a impressão.
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Área de Preview (no-print para o fundo) -->
+    <main id="app-layout" class="flex-1 p-4 xl:p-12 overflow-y-auto">
+        
+        <div class="no-print mb-8 max-w-[1100px] mx-auto flex justify-between items-end">
+            <div>
+                <h2 class="text-2xl font-bold text-slate-800">Visualização de Engenharia</h2>
+                <p class="text-sm text-slate-500">Ajuste os parâmetros à esquerda para atualizar o livreto.</p>
+            </div>
+            <div class="hidden md:flex gap-2">
+                <span class="px-3 py-1 bg-blue-100 text-blue-700 text-[10px] font-bold rounded-full uppercase">Pág 1 (Esquerda)</span>
+                <span class="px-3 py-1 bg-rose-100 text-rose-700 text-[10px] font-bold rounded-full uppercase">Pág 2 (Direita)</span>
+            </div>
+        </div>
+
+        <div id="print-canvas" class="preview-frame">
+            
+            <!-- Página 1 (Frente/Esquerda) -->
+            <div class="page-a5" id="page-1">
+                <header class="border-b-4 border-slate-900 pb-3 mb-6">
+                    <div class="flex justify-between text-[11px] font-bold font-mono">
+                        <span>DATA: ____ / ____ / ____</span>
+                        <div class="border-2 border-slate-900 px-3 py-1">PONTOS: ______</div>
+                    </div>
+                    <div class="flex justify-between items-end mt-3">
+                        <span class="text-base font-bold uppercase">ALUNO: <span id="v-name-1" class="border-b-2 border-slate-400 min-w-[200px] inline-block"></span></span>
+                        <div class="text-[10px] font-mono text-right leading-tight">
+                            START: ____ : ____<br>
+                            STOP: &nbsp;____ : ____
+                        </div>
+                    </div>
+                </header>
+
+                <div class="flex justify-between items-center mb-6">
+                    <h3 id="v-title-1" class="text-xl font-black italic tracking-tighter text-slate-800">NOME DA MATÉRIA</h3>
+                    <span id="v-code-1" class="text-[10px] font-mono bg-slate-900 text-white px-2 py-1 rounded">LV-01-A</span>
+                </div>
+
+                <div id="content-1" class="flex-1 space-y-2 kids-font">
+                    <!-- Dinâmico -->
+                </div>
+
+                <footer class="mt-6 pt-2 border-t border-slate-200 flex justify-between text-[9px] text-slate-400 font-bold uppercase">
+                    <span>Engenharia Kumon SPA</span>
+                    <span class="text-slate-900">Página 01</span>
+                </footer>
+            </div>
+
+            <!-- Página 2 (Frente/Direita) -->
+            <div class="page-a5" id="page-2">
+                <header class="border-b-4 border-slate-900 pb-3 mb-6">
+                    <div class="flex justify-between text-[11px] font-bold font-mono">
+                        <span>DATA: ____ / ____ / ____</span>
+                        <div class="border-2 border-slate-900 px-3 py-1">PONTOS: ______</div>
+                    </div>
+                    <div class="flex justify-between items-end mt-3">
+                        <span class="text-base font-bold uppercase">ALUNO: <span id="v-name-2" class="border-b-2 border-slate-400 min-w-[200px] inline-block"></span></span>
+                        <div class="text-[10px] font-mono text-right leading-tight">
+                            START: ____ : ____<br>
+                            STOP: &nbsp;____ : ____
+                        </div>
+                    </div>
+                </header>
+
+                <div class="flex justify-between items-center mb-6">
+                    <h3 id="v-title-2" class="text-xl font-black italic tracking-tighter text-slate-800">NOME DA MATÉRIA</h3>
+                    <span id="v-code-2" class="text-[10px] font-mono bg-slate-900 text-white px-2 py-1 rounded">LV-01-B</span>
+                </div>
+
+                <div id="content-2" class="flex-1 space-y-2 kids-font">
+                    <!-- Dinâmico -->
+                </div>
+
+                <footer class="mt-6 pt-2 border-t border-slate-200 flex justify-between text-[9px] text-slate-400 font-bold uppercase">
+                    <span>Engenharia Kumon SPA</span>
+                    <span class="text-slate-900">Página 02</span>
+                </footer>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        // ESTADO DO ENGENHEIRO
+        const CONFIG = {
+            subject: 'math',
+            name: '',
+            bookNum: 1,
+            items: 7
+        };
+
+        // Troca de Disciplina
+        function changeSubject(sub) {
+            CONFIG.subject = sub;
+            
+            // UI Update
+            document.getElementById('tab-math').classList.toggle('active-subject-tab', sub === 'math');
+            document.getElementById('tab-port').classList.toggle('active-subject-tab', sub === 'port');
+            
+            document.getElementById('panel-math').classList.toggle('hidden', sub !== 'math');
+            document.getElementById('panel-port').classList.toggle('hidden', sub !== 'port');
+
+            render();
+        }
+
+        // Renderização Principal (Engenharia de Conteúdo)
+        function render() {
+            // Sincronizar Config
+            CONFIG.name = document.getElementById('cfg-name').value;
+            CONFIG.bookNum = document.getElementById('cfg-book-num').value;
+            CONFIG.items = parseInt(document.getElementById('cfg-items').value) || 7;
+
+            // Update UI Básica
+            document.getElementById('v-name-1').innerText = CONFIG.name || "____________________";
+            document.getElementById('v-name-2').innerText = CONFIG.name || "____________________";
+
+            // Mostrar/Ocultar campos específicos de Matemática
+            const mathMode = document.getElementById('math-mode').value;
+            document.getElementById('math-op-val-container').classList.toggle('hidden', mathMode === 'tracing' || mathMode === 'sequence');
+
+            // Gerar Conteúdo
+            if (CONFIG.subject === 'math') {
+                renderMath();
+            } else {
+                renderPort();
+            }
+        }
+
+        function renderMath() {
+            const mode = document.getElementById('math-mode').value;
+            const start = parseInt(document.getElementById('math-start').value) || 1;
+            const step = parseInt(document.getElementById('math-step').value) || 1;
+            const opVal = parseInt(document.getElementById('math-op-val').value) || 1;
+            const count = CONFIG.items;
+
+            const title = "MATEMÁTICA";
+            const color = "#0284c7"; // Sky 600
+
+            document.getElementById('v-title-1').innerText = title;
+            document.getElementById('v-title-2').innerText = title;
+            document.getElementById('v-title-1').style.color = color;
+            document.getElementById('v-title-2').style.color = color;
+
+            const list1 = [];
+            const list2 = [];
+
+            // Geração da Engenharia Matemática
+            for (let i = 0; i < count; i++) {
+                // Página 1
+                let current1 = start + (i * step);
+                list1.push(buildMathItem(mode, current1, opVal));
+                
+                // Página 2 (Continuação)
+                let current2 = start + ((i + count) * step);
+                list2.push(buildMathItem(mode, current2, opVal));
+            }
+
+            drawItems('content-1', list1);
+            drawItems('content-2', list2);
+
+            document.getElementById('v-code-1').innerText = `M${CONFIG.bookNum}-A`;
+            document.getElementById('v-code-2').innerText = `M${CONFIG.bookNum}-B`;
+        }
+
+        function buildMathItem(mode, val, opVal) {
+            switch(mode) {
+                case 'tracing':
+                    return { label: `Pratique o número:`, trace: val, box: true };
+                case 'addition':
+                    return { label: `${val} + ${opVal} =`, trace: '', box: true };
+                case 'subtraction':
+                    return { label: `${val + opVal} - ${opVal} =`, trace: '', box: true };
+                case 'sequence':
+                    return { label: `O que vem depois do ${val}?`, trace: '___', box: false };
+            }
+        }
+
+        function renderPort() {
+            const mode = document.getElementById('port-mode').value;
+            const raw = document.getElementById('port-content').value;
+            const words = raw.split(',').map(s => s.trim()).filter(s => s.length > 0);
+            const count = CONFIG.items;
+
+            const title = "PORTUGUÊS";
+            const color = "#f43f5e"; // Rose 500
+
+            document.getElementById('v-title-1').innerText = title;
+            document.getElementById('v-title-2').innerText = title;
+            document.getElementById('v-title-1').style.color = color;
+            document.getElementById('v-title-2').style.color = color;
+
+            const list1 = [];
+            const list2 = [];
+
+            for (let i = 0; i < count; i++) {
+                // Página 1
+                if (words[i]) {
+                    list1.push({ 
+                        label: mode === 'trace' ? 'Trace a palavra:' : 'Escreva a palavra:', 
+                        trace: mode === 'trace' ? words[i] : '', 
+                        box: true,
+                        wordLabel: mode === 'copy' ? words[i] : null
+                    });
+                }
+                // Página 2
+                let idx2 = i + count;
+                if (words[idx2]) {
+                    list2.push({ 
+                        label: mode === 'trace' ? 'Trace a palavra:' : 'Escreva a palavra:', 
+                        trace: mode === 'trace' ? words[idx2] : '', 
+                        box: true,
+                        wordLabel: mode === 'copy' ? words[idx2] : null
+                    });
+                }
+            }
+
+            drawItems('content-1', list1);
+            drawItems('content-2', list2);
+
+            document.getElementById('v-code-1').innerText = `P${CONFIG.bookNum}-A`;
+            document.getElementById('v-code-2').innerText = `P${CONFIG.bookNum}-B`;
+        }
+
+        function drawItems(containerId, list) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+
+            list.forEach(item => {
+                const row = document.createElement('div');
+                row.className = 'item-row';
+
+                const labelGrp = document.createElement('div');
+                labelGrp.className = 'flex flex-col';
+                
+                const label = document.createElement('span');
+                label.className = 'text-xs font-bold text-slate-500 uppercase tracking-tight';
+                label.innerText = item.label;
+                labelGrp.appendChild(label);
+
+                if (item.wordLabel) {
+                    const subLabel = document.createElement('span');
+                    subLabel.className = 'text-2xl font-black text-slate-900';
+                    subLabel.innerText = item.wordLabel;
+                    labelGrp.appendChild(subLabel);
+                }
+
+                const actionGrp = document.createElement('div');
+                actionGrp.className = 'flex items-center gap-6';
+
+                if (item.trace) {
+                    const trace = document.createElement('span');
+                    trace.className = 'trace-preview';
+                    trace.innerText = item.trace;
+                    actionGrp.appendChild(trace);
+                }
+
+                if (item.box) {
+                    const box = document.createElement('div');
+                    box.className = 'writing-box';
+                    actionGrp.appendChild(box);
+                }
+
+                row.appendChild(labelGrp);
+                row.appendChild(actionGrp);
+                container.appendChild(row);
+            });
+        }
+
+        function handlePrint() {
+            // Garante que o estado está atualizado antes de imprimir
+            render();
+            window.print();
+        }
+
+        // Inicialização
+        window.onload = () => {
+            render();
+        };
+
+    </script>
+</body>
+</html>
