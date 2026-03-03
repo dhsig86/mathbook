@@ -4,25 +4,58 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KumonGen · Início</title>
+    <!-- Tailwind via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        }
+    </style>
 </head>
-<body class="bg-slate-900 text-white flex items-center justify-center min-h-screen">
-    <div class="text-center">
-        <h1 class="text-4xl font-black mb-8">Kumon<span class="text-indigo-400">Gen</span></h1>
-        <p class="text-lg mb-12 text-slate-300">Escolha uma matéria para gerar seu caderno personalizado</p>
-        <div class="flex flex-col sm:flex-row gap-6 justify-center">
-            <a href="portugues.html" class="bg-indigo-600 hover:bg-indigo-700 px-8 py-4 rounded-2xl text-xl font-bold shadow-lg flex items-center gap-3">
-                <i class="fas fa-font"></i> Português
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="max-w-4xl w-full text-center">
+        <h1 class="text-5xl font-black text-white mb-4">
+            Kumon<span class="text-indigo-400">Gen</span>
+        </h1>
+        <p class="text-xl text-slate-300 mb-12">Gerador de cadernos personalizados</p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Matemática - Azul e branco -->
+            <a href="matematica.html" class="group bg-blue-600 hover:bg-blue-700 rounded-2xl p-8 shadow-2xl transition-all transform hover:scale-105">
+                <div class="flex flex-col items-center">
+                    <i class="fas fa-calculator text-white text-5xl mb-4"></i>
+                    <h2 class="text-2xl font-bold text-white mb-2">Matemática</h2>
+                    <p class="text-blue-100">Números, contas, desafios</p>
+                    <span class="mt-4 inline-block bg-white text-blue-600 px-4 py-2 rounded-full text-sm font-bold group-hover:bg-blue-50">Acessar →</span>
+                </div>
             </a>
-            <a href="matematica.html" class="bg-indigo-600 hover:bg-indigo-700 px-8 py-4 rounded-2xl text-xl font-bold shadow-lg flex items-center gap-3">
-                <i class="fas fa-calculator"></i> Matemática
+
+            <!-- Português - Verde e amarelo (inspiração bandeira) -->
+            <a href="portugues.html" class="group bg-gradient-to-br from-green-600 to-yellow-500 hover:from-green-700 hover:to-yellow-600 rounded-2xl p-8 shadow-2xl transition-all transform hover:scale-105">
+                <div class="flex flex-col items-center">
+                    <i class="fas fa-font text-white text-5xl mb-4"></i>
+                    <h2 class="text-2xl font-bold text-white mb-2">Português</h2>
+                    <p class="text-green-100">Letras, sílabas, palavras</p>
+                    <span class="mt-4 inline-block bg-white text-green-600 px-4 py-2 rounded-full text-sm font-bold group-hover:bg-green-50">Acessar →</span>
+                </div>
             </a>
-            <a href="ingles.html" class="bg-indigo-600 hover:bg-indigo-700 px-8 py-4 rounded-2xl text-xl font-bold shadow-lg flex items-center gap-3">
-                <i class="fas fa-language"></i> Inglês
+
+            <!-- Inglês - Vermelho e azul (inspiração bandeira do Reino Unido) -->
+            <a href="ingles.html" class="group bg-gradient-to-br from-red-600 to-blue-600 hover:from-red-700 hover:to-blue-700 rounded-2xl p-8 shadow-2xl transition-all transform hover:scale-105">
+                <div class="flex flex-col items-center">
+                    <i class="fas fa-language text-white text-5xl mb-4"></i>
+                    <h2 class="text-2xl font-bold text-white mb-2">Inglês</h2>
+                    <p class="text-red-100">Alphabet, words, phonics</p>
+                    <span class="mt-4 inline-block bg-white text-red-600 px-4 py-2 rounded-full text-sm font-bold group-hover:bg-red-50">Acessar →</span>
+                </div>
             </a>
         </div>
-        <p class="mt-12 text-xs text-slate-500">criado por Dario Hart · Free use 2026</p>
+
+        <p class="mt-12 text-slate-500 text-sm">
+            criado por Dario Hart · Free use 2026
+        </p>
     </div>
 </body>
 </html>
