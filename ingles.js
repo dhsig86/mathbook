@@ -12,7 +12,7 @@
             },
             {
                 id: 'i2',
-                title: 'I2 · Simple Words (CVC)',
+                title: 'I2 · Simple words (3 letters)',
                 type: 'wordbuilding',
                 words: [
                     { word: 'CAT', parts: ['C','A','T'] },
@@ -20,41 +20,27 @@
                     { word: 'SUN', parts: ['S','U','N'] },
                     { word: 'CAR', parts: ['C','A','R'] },
                     { word: 'BED', parts: ['B','E','D'] },
-                    { word: 'FAN', parts: ['F','A','N'] },
                     { word: 'HAT', parts: ['H','A','T'] },
-                    { word: 'LEG', parts: ['L','E','G'] },
-                    { word: 'MOON', parts: ['M','O','O','N'] },
-                    { word: 'FISH', parts: ['F','I','S','H'] }
+                    { word: 'FOG', parts: ['F','O','G'] },
+                    { word: 'LEG', parts: ['L','E','G'] }
                 ],
-                instruction: 'Put the letters together.'
+                instruction: 'Put the letters together to form the word.'
             },
             {
                 id: 'i3',
-                title: 'I3 · Common Words',
+                title: 'I3 · Easy words (4-5 letters)',
                 type: 'wordbuilding',
                 words: [
+                    { word: 'BIRD', parts: ['B','IR','D'] },
+                    { word: 'FISH', parts: ['F','I','SH'] },
+                    { word: 'TREE', parts: ['T','R','EE'] },
+                    { word: 'BOOK', parts: ['B','OO','K'] },
                     { word: 'HOUSE', parts: ['H','OU','SE'] },
-                    { word: 'TRAIN', parts: ['T','RAI','N'] },
-                    { word: 'PLANE', parts: ['P','LA','NE'] },
-                    { word: 'SMALL', parts: ['S','MA','LL'] },
-                    { word: 'GREEN', parts: ['G','R','EE','N'] },
-                    { word: 'BLACK', parts: ['B','LA','CK'] }
+                    { word: 'CLOCK', parts: ['C','LO','CK'] },
+                    { word: 'SNAKE', parts: ['S','NA','KE'] },
+                    { word: 'FLOWER', parts: ['F','LO','WER'] }
                 ],
-                instruction: 'Form the word.'
-            },
-            {
-                id: 'i4',
-                title: 'I4 · Phonics (short vowels)',
-                type: 'syllables',
-                syllables: ['AT', 'ET', 'IT', 'OT', 'UT', 'AN', 'EN', 'IN', 'ON', 'UN'],
-                instruction: 'Read and copy.'
-            },
-            {
-                id: 'i5',
-                title: 'I5 · Numbers (1-10)',
-                type: 'quantity',
-                numbers: [1,2,3,4,5,6,7,8,9,10],
-                instruction: 'Count and write the number.'
+                instruction: 'Combine the parts to make the word.'
             }
         ]
     };
@@ -77,17 +63,19 @@
             { word: 'SUN', parts: ['S','U','N'] },
             { word: 'CAR', parts: ['C','A','R'] },
             { word: 'BED', parts: ['B','E','D'] },
-            { word: 'FAN', parts: ['F','A','N'] },
             { word: 'HAT', parts: ['H','A','T'] },
+            { word: 'FOG', parts: ['F','O','G'] },
             { word: 'LEG', parts: ['L','E','G'] },
-            { word: 'MOON', parts: ['M','O','O','N'] },
-            { word: 'FISH', parts: ['F','I','S','H'] }
+            { word: 'BIRD', parts: ['B','IR','D'] },
+            { word: 'FISH', parts: ['F','I','SH'] },
+            { word: 'TREE', parts: ['T','R','EE'] },
+            { word: 'BOOK', parts: ['B','OO','K'] },
+            { word: 'HOUSE', parts: ['H','OU','SE'] },
+            { word: 'CLOCK', parts: ['C','LO','CK'] },
+            { word: 'SNAKE', parts: ['S','NA','KE'] },
+            { word: 'FLOWER', parts: ['F','LO','WER'] }
         ],
-        wordRepeat: 2,
-        syllableList: ['AT', 'ET', 'IT', 'OT', 'UT', 'AN', 'EN', 'IN', 'ON', 'UN'],
-        syllableRepeat: 2,
-        qtyNumbers: [1,2,3,4,5,6,7,8,9,10],
-        qtyRepeat: 2
+        wordRepeat: 2
     };
 
     // ---------- FUNÇÕES DE GERAÇÃO DE ITENS ----------
@@ -109,22 +97,6 @@
                 customParams.wordList.forEach(wordObj => {
                     for (let i = 0; i < customParams.wordRepeat; i++) {
                         baseItems.push({ type: 'word', word: wordObj.word, parts: wordObj.parts });
-                    }
-                });
-                break;
-
-            case 'syllables':
-                customParams.syllableList.forEach(syllable => {
-                    for (let i = 0; i < customParams.syllableRepeat; i++) {
-                        baseItems.push({ type: 'syllable', syllable: syllable });
-                    }
-                });
-                break;
-
-            case 'quantity':
-                customParams.qtyNumbers.forEach(n => {
-                    for (let i = 0; i < customParams.qtyRepeat; i++) {
-                        baseItems.push({ type: 'quantity', value: n });
                     }
                 });
                 break;
@@ -158,7 +130,7 @@
                             <input type="text" id="traceLetters" value="${customParams.traceLetters.join(',')}" class="w-32">
                         </div>
                         <div class="param-row">
-                            <label>Repeats:</label>
+                            <label>Repetitions:</label>
                             <input type="number" id="traceRepeat" value="${customParams.traceRepeat}" min="1" max="5" class="w-16">
                         </div>
                     </div>
@@ -166,6 +138,7 @@
                 break;
 
             case 'wordbuilding':
+                // Formato: WORD:part1,part2,part3; WORD2:part1,part2
                 let wordString = customParams.wordList.map(w => `${w.word}:${w.parts.join(',')}`).join('; ');
                 html = `
                     <div class="param-control">
@@ -174,38 +147,8 @@
                             <input type="text" id="wordList" value="${wordString}" class="w-32">
                         </div>
                         <div class="param-row">
-                            <label>Repeats:</label>
+                            <label>Repetitions:</label>
                             <input type="number" id="wordRepeat" value="${customParams.wordRepeat}" min="1" max="5" class="w-16">
-                        </div>
-                    </div>
-                `;
-                break;
-
-            case 'syllables':
-                html = `
-                    <div class="param-control">
-                        <div class="param-row">
-                            <label>Syllables (comma separated):</label>
-                            <input type="text" id="syllableList" value="${customParams.syllableList.join(',')}" class="w-32">
-                        </div>
-                        <div class="param-row">
-                            <label>Repeats:</label>
-                            <input type="number" id="syllableRepeat" value="${customParams.syllableRepeat}" min="1" max="5" class="w-16">
-                        </div>
-                    </div>
-                `;
-                break;
-
-            case 'quantity':
-                html = `
-                    <div class="param-control">
-                        <div class="param-row">
-                            <label>Numbers (comma separated):</label>
-                            <input type="text" id="qtyNumbers" value="${customParams.qtyNumbers.join(',')}" class="w-32">
-                        </div>
-                        <div class="param-row">
-                            <label>Repeats:</label>
-                            <input type="number" id="qtyRepeat" value="${customParams.qtyRepeat}" min="1" max="5" class="w-16">
                         </div>
                     </div>
                 `;
@@ -235,6 +178,7 @@
                 const inpWords = document.getElementById('wordList');
                 const inpRepeat = document.getElementById('wordRepeat');
                 if (inpWords) inpWords.addEventListener('change', (e) => {
+                    // formato "WORD:part1,part2; WORD2:part1,part2"
                     const parts = e.target.value.split(';').map(s => s.trim());
                     const newWords = [];
                     parts.forEach(p => {
@@ -250,29 +194,10 @@
                     customParams.wordRepeat = parseInt(e.target.value) || 2;
                 });
             }
-            if (type === 'syllables') {
-                const inpSyl = document.getElementById('syllableList');
-                const inpRepeat = document.getElementById('syllableRepeat');
-                if (inpSyl) inpSyl.addEventListener('change', (e) => {
-                    customParams.syllableList = e.target.value.split(',').map(s => s.trim()).filter(s => s.length > 0);
-                });
-                if (inpRepeat) inpRepeat.addEventListener('change', (e) => {
-                    customParams.syllableRepeat = parseInt(e.target.value) || 2;
-                });
-            }
-            if (type === 'quantity') {
-                const inpNumbers = document.getElementById('qtyNumbers');
-                const inpRepeat = document.getElementById('qtyRepeat');
-                if (inpNumbers) inpNumbers.addEventListener('change', (e) => {
-                    customParams.qtyNumbers = e.target.value.split(',').map(Number).filter(n => !isNaN(n));
-                });
-                if (inpRepeat) inpRepeat.addEventListener('change', (e) => {
-                    customParams.qtyRepeat = parseInt(e.target.value) || 2;
-                });
-            }
         }, 50);
     }
 
+    // ---------- RENDERIZAÇÃO DA LISTA DE NÍVEIS ----------
     function renderLevelList() {
         if (!levelListDiv) return;
         const levels = LevelLibrary.ingles;
@@ -293,6 +218,7 @@
         refreshPreview();
     };
 
+    // ---------- REFRESH PREVIEW ----------
     function refreshPreview() {
         const level = LevelLibrary.ingles.find(l => l.id === currentLevelId);
         if (!level) return;
@@ -305,7 +231,9 @@
         KumonGen.buildPage(pageRight, level, 2, rightItems);
     }
 
+    // ---------- INICIALIZAÇÃO ----------
     function init() {
+        // Agora o DOM está pronto, podemos obter os elementos
         pageLeft = document.getElementById('pageLeft');
         pageRight = document.getElementById('pageRight');
         levelListDiv = document.getElementById('levelList');
