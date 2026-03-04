@@ -1,6 +1,5 @@
 // ingles.js - Lógica específica para Inglês com interface amigável
 (function() {
-    // ---------- BANCO DE DADOS ----------
     const LevelLibrary = {
         ingles: [
             {
@@ -24,22 +23,16 @@
         ]
     };
 
-    // ---------- ESTADO LOCAL ----------
     let currentLevelId = 'i1';
     let itemsPerPage = 8;
     let currentZoom = 0.7;
 
-    // Elementos DOM
     let pageLeft, pageRight, levelListDiv, paramPanel, zoomSpan, zoomContainer;
 
-    // ---------- PARÂMETROS CUSTOMIZÁVEIS ----------
     let customParams = {
-        // Para trace
-        traceSelected: [],  // será preenchido com todas as letras no init
+        traceSelected: [],
         traceRepeat: 2,
-        // Para wordbuilding (níveis I2 e I3)
         wordList: [
-            // CVC words (I2)
             { word: 'CAT', parts: ['C','A','T'] },
             { word: 'DOG', parts: ['D','O','G'] },
             { word: 'SUN', parts: ['S','U','N'] },
@@ -50,7 +43,6 @@
             { word: 'LEG', parts: ['L','E','G'] },
             { word: 'PIG', parts: ['P','I','G'] },
             { word: 'BUS', parts: ['B','U','S'] },
-            // 4-5 letter words (I3)
             { word: 'BIRD', parts: ['B','IR','D'] },
             { word: 'FISH', parts: ['F','I','SH'] },
             { word: 'TREE', parts: ['T','R','EE'] },
@@ -65,7 +57,6 @@
         wordRepeat: 2
     };
 
-    // ---------- FUNÇÕES DE GERAÇÃO DE ITENS ----------
     function generateItemsForLevel(level) {
         if (!level) return [];
 
@@ -101,7 +92,6 @@
         return result;
     }
 
-    // ---------- PAINEL DE PARÂMETROS ----------
     function updateParamPanel() {
         const level = LevelLibrary.ingles.find(l => l.id === currentLevelId);
         if (!level || !paramPanel) return;
@@ -124,7 +114,6 @@
     }
 
     function renderTracePanel() {
-        // Alfabeto completo com K e W
         const allLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
         let checkboxes = '';
         allLetters.forEach(letter => {
@@ -147,12 +136,12 @@
                 </div>
                 <div class="param-row">
                     <label>Repetitions:</label>
-                    <input type="number" id="traceRepeat" value="${customParams.traceRepeat}" min="1" max="5" class="w-16">
+                    <input type="number" id="traceRepeat" value="${customParams.traceRepeat}" min="1" max="5">
                 </div>
-                <div class="flex flex-wrap gap-2 mt-1">
-                    <button id="selectAllTrace" class="text-xs bg-slate-200 px-2 py-1 rounded hover:bg-slate-300">Select all</button>
-                    <button id="clearAllTrace" class="text-xs bg-slate-200 px-2 py-1 rounded hover:bg-slate-300">Clear</button>
-                    <button id="randomTrace" class="text-xs bg-slate-200 px-2 py-1 rounded hover:bg-slate-300">Random</button>
+                <div class="button-group">
+                    <button id="selectAllTrace">Select all</button>
+                    <button id="clearAllTrace">Clear</button>
+                    <button id="randomTrace">Random</button>
                 </div>
             </div>
         `;
@@ -182,7 +171,7 @@
                 </div>
                 <div class="border-t border-slate-200 my-2 pt-2">
                     <label class="block text-xs font-bold mb-1">Add new word:</label>
-                    <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+                    <div class="flex-row-params">
                         <input type="text" id="newWord" placeholder="Word (e.g., CAT)" class="flex-1 text-xs border rounded px-2 py-1">
                         <input type="text" id="newParts" placeholder="Parts separated by space (e.g., C A T)" class="flex-1 text-xs border rounded px-2 py-1">
                         <button id="addWordBtn" class="bg-red-600 text-white px-3 py-1 rounded text-xs font-bold hover:bg-red-700 whitespace-nowrap">
@@ -192,7 +181,7 @@
                 </div>
                 <div class="param-row">
                     <label>Repetitions:</label>
-                    <input type="number" id="wordRepeat" value="${customParams.wordRepeat}" min="1" max="5" class="w-16">
+                    <input type="number" id="wordRepeat" value="${customParams.wordRepeat}" min="1" max="5">
                 </div>
             </div>
         `;
@@ -201,7 +190,6 @@
     function attachParamEvents(type) {
         setTimeout(() => {
             if (type === 'trace') {
-                // Checkboxes
                 document.querySelectorAll('.trace-letter').forEach(cb => {
                     cb.addEventListener('change', (e) => {
                         const letter = e.target.value;
@@ -215,7 +203,6 @@
                     });
                 });
 
-                // Select all
                 document.getElementById('selectAllTrace')?.addEventListener('click', () => {
                     document.querySelectorAll('.trace-letter').forEach(cb => {
                         cb.checked = true;
@@ -226,7 +213,6 @@
                     });
                 });
 
-                // Clear
                 document.getElementById('clearAllTrace')?.addEventListener('click', () => {
                     document.querySelectorAll('.trace-letter').forEach(cb => {
                         cb.checked = false;
@@ -234,7 +220,6 @@
                     customParams.traceSelected = [];
                 });
 
-                // Random (select ~50%)
                 document.getElementById('randomTrace')?.addEventListener('click', () => {
                     const selected = [];
                     document.querySelectorAll('.trace-letter').forEach(cb => {
@@ -252,7 +237,6 @@
             }
 
             if (type === 'wordbuilding') {
-                // Add word
                 document.getElementById('addWordBtn')?.addEventListener('click', () => {
                     const wordInput = document.getElementById('newWord');
                     const partsInput = document.getElementById('newParts');
@@ -270,7 +254,6 @@
                     }
                 });
 
-                // Remove word (delegation)
                 const container = document.getElementById('wordListContainer');
                 if (container) {
                     container.addEventListener('click', (e) => {
