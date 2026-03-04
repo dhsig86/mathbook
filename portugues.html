@@ -9,7 +9,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <style>
-        /* ESTILOS IGUAIS AOS DA MATEMÁTICA (mantidos) */
+        /* ESTILOS PRÉ-EXISTENTES (MANTIDOS) */
         #a4-sheet {
             background: white;
             box-shadow: 0 10px 40px rgba(0,0,0,0.2);
@@ -151,45 +151,91 @@
         .tens-block.blue { background-color: #bfdbfe; }
         .tens-block.yellow { background-color: #fef08a; }
 
-        /* Estilos para os painéis de parâmetro */
+        /* NOVOS ESTILOS PARA INTERFACE RESPONSIVA */
         .param-control {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 12px;
             background: #f8fafc;
-            padding: 10px;
+            padding: 12px;
             border-radius: 8px;
             margin-top: 4px;
-        }
-        .param-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.75rem;
-        }
-        .param-row input, .param-row select {
-            width: 70px;
-            padding: 2px 4px;
-            border: 1px solid #cbd5e1;
-            border-radius: 4px;
-        }
-        .param-row label {
-            font-weight: 500;
-        }
-        .checkbox-row {
-            justify-content: flex-start;
-            gap: 8px;
-        }
-        .checkbox-row input {
-            width: auto;
+            width: 100%;
+            box-sizing: border-box;
         }
 
-        /* Responsividade básica */
+        .param-row {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 4px;
+            font-size: 0.75rem;
+        }
+
+        .param-row label {
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+
+        .param-row input,
+        .param-row select {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .flex-row-params {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .button-group button {
+            flex: 1 1 auto;
+            padding: 6px 8px;
+            font-size: 0.7rem;
+            background-color: #e2e8f0;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .button-group button:hover {
+            background-color: #cbd5e1;
+        }
+
+        #wordListContainer {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            padding: 8px;
+            background: white;
+        }
+
+        /* Ajustes na sidebar */
+        aside {
+            width: 100%;
+            max-width: 320px;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
         @media (max-width: 768px) {
             aside {
-                width: 100% !important;
-                height: auto !important;
-                position: relative !important;
+                max-width: 100%;
+                height: auto;
+                position: relative;
             }
             main {
                 padding: 8px !important;
@@ -200,6 +246,23 @@
             }
             .page {
                 padding: 15px 11px;
+            }
+        }
+
+        @media (min-width: 640px) {
+            .flex-row-params {
+                flex-direction: row;
+                align-items: center;
+            }
+            .param-row {
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+            }
+            .param-row input,
+            .param-row select {
+                width: auto;
+                min-width: 80px;
             }
         }
     </style>
@@ -255,7 +318,7 @@
             <div id="paramPanel" class="bg-slate-50 p-3 rounded-xl min-h-[100px] text-xs"></div>
         </div>
 
-        <!-- Ações (agora com cores verde e amarelo) -->
+        <!-- Ações -->
         <div class="border-t border-slate-100 pt-4 space-y-2">
             <button onclick="refreshPreview()" class="w-full flex items-center justify-center gap-2 bg-green-600 text-white p-3 rounded-xl hover:bg-green-700 font-bold text-sm shadow">
                 <i class="fas fa-sync-alt"></i> atualizar preview
