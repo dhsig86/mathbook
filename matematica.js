@@ -16,45 +16,34 @@
     // ---------- ESTADO LOCAL ----------
     let currentLevelId = 'm2';
     let itemsPerPage = 8;   // será sincronizado com o select
-    let currentZoom = 0.7;   // pode ser usado internamente, mas o zoom é controlado pelo KumonGen
+    let currentZoom = 0.7;
 
-    // Elementos DOM específicos da página
-    const pageLeft = document.getElementById('pageLeft');
-    const pageRight = document.getElementById('pageRight');
-    const levelListDiv = document.getElementById('levelList');
-    const paramPanel = document.getElementById('paramPanel');
-    const zoomSpan = document.getElementById('zoomValue');
-    const zoomContainer = document.getElementById('zoomContainer');
+    // Elementos DOM (serão obtidos no init)
+    let pageLeft, pageRight, levelListDiv, paramPanel, zoomSpan, zoomContainer;
 
-    // Parâmetros customizáveis (valores padrão)
+    // Parâmetros customizáveis
     let customParams = {
-        // quantity
         qtyNumbers: [1,2,3,4,5],
         qtyRepeat: 2,
-        // math
         operator: '+',
         operand: 1,
         min: 1,
         max: 9,
         allowNegative: false,
-        // sequence
         seqFixed: true,
         seqStep: 1,
         seqLength: 5,
         seqCount: 4,
-        // tens
         tensNumbers: [11,12,13,14,15,16,17,18,19],
-        // compare
         compPairs: [[3,5],[7,2],[4,4],[6,9]],
         compRandom: false,
         compMin: 1,
         compMax: 10,
         compCount: 4,
-        // neighbors
         neighborCenters: [5,10,15,18]
     };
 
-    // ---------- FUNÇÕES DE GERAÇÃO DE ITENS POR TIPO ----------
+    // ---------- FUNÇÕES DE GERAÇÃO DE ITENS ----------
     function generateItemsForLevel(level) {
         if (!level) return [];
 
@@ -82,7 +71,7 @@
                         operand2: customParams.operand
                     });
                 }
-                return baseItems; // já tem tamanho exato
+                return baseItems;
 
             case 'sequence':
                 if (customParams.seqFixed) {
@@ -132,7 +121,6 @@
                 return Array(itemsPerPage * 2).fill({ type: 'unknown' });
         }
 
-        // Garante o tamanho exato (cíclico)
         const target = itemsPerPage * 2;
         if (baseItems.length === 0) return Array(target).fill({ type: 'unknown' });
         let result = [];
@@ -142,10 +130,10 @@
         return result;
     }
 
-    // ---------- PAINEL DE PARÂMETROS DINÂMICO ----------
+    // ---------- PAINEL DE PARÂMETROS ----------
     function updateParamPanel() {
         const level = LevelLibrary.matematica.find(l => l.id === currentLevelId);
-        if (!level) return;
+        if (!level || !paramPanel) return;
 
         let html = '';
 
@@ -164,7 +152,6 @@
                     </div>
                 `;
                 break;
-
             case 'math':
                 html = `
                     <div class="param-control">
@@ -194,7 +181,6 @@
                     </div>
                 `;
                 break;
-
             case 'sequence':
                 html = `
                     <div class="param-control">
@@ -217,7 +203,6 @@
                     </div>
                 `;
                 break;
-
             case 'tens':
                 html = `
                     <div class="param-control">
@@ -228,7 +213,6 @@
                     </div>
                 `;
                 break;
-
             case 'compare':
                 html = `
                     <div class="param-control">
@@ -255,7 +239,6 @@
                     </div>
                 `;
                 break;
-
             case 'neighbors':
                 html = `
                     <div class="param-control">
@@ -266,7 +249,6 @@
                     </div>
                 `;
                 break;
-
             default:
                 html = '<div class="text-slate-400">Sem parâmetros adicionais.</div>';
         }
@@ -338,8 +320,8 @@
         }, 50);
     }
 
-    // ---------- RENDERIZAÇÃO DA LISTA DE NÍVEIS ----------
     function renderLevelList() {
+        if (!levelListDiv) return;
         const levels = LevelLibrary.matematica;
         let html = '';
         levels.forEach(lvl => {
@@ -358,7 +340,6 @@
         refreshPreview();
     };
 
-    // ---------- REFRESH PREVIEW ----------
     function refreshPreview() {
         const level = LevelLibrary.matematica.find(l => l.id === currentLevelId);
         if (!level) return;
@@ -371,16 +352,21 @@
         KumonGen.buildPage(pageRight, level, 2, rightItems);
     }
 
-    // ---------- INICIALIZAÇÃO ----------
     function init() {
-        // Inicializa referências do gerador
+        // Agora o DOM está pronto, podemos obter os elementos
+        pageLeft = document.getElementById('pageLeft');
+        pageRight = document.getElementById('pageRight');
+        levelListDiv = document.getElementById('levelList');
+        paramPanel = document.getElementById('paramPanel');
+        zoomSpan = document.getElementById('zoomValue');
+        zoomContainer = document.getElementById('zoomContainer');
+
         KumonGen.initRefs();
 
         renderLevelList();
         updateParamPanel();
         refreshPreview();
 
-        // Sincroniza itemsPerPage com o select
         const linesSelect = document.getElementById('linesPerPage');
         if (linesSelect) {
             linesSelect.addEventListener('change', (e) => {
@@ -389,17 +375,14 @@
             });
         }
 
-        // Exibe zoom inicial
         if (zoomSpan) zoomSpan.innerText = Math.round(currentZoom * 100) + '%';
         if (zoomContainer) zoomContainer.style.transform = `scale(${currentZoom})`;
     }
 
-    // Expõe funções necessárias globalmente (para os botões)
     window.adjustZoom = KumonGen.adjustZoom;
     window.generatePDF = () => KumonGen.generatePDF('a4-sheet');
     window.refreshPreview = refreshPreview;
 
-    // Inicia tudo quando o DOM estiver pronto
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init);
     } else {
