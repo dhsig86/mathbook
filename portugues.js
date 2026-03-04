@@ -175,12 +175,12 @@
                 </div>
                 <div class="param-row">
                     <label>Repetições:</label>
-                    <input type="number" id="traceRepeat" value="${customParams.traceRepeat}" min="1" max="5" class="w-16">
+                    <input type="number" id="traceRepeat" value="${customParams.traceRepeat}" min="1" max="5">
                 </div>
-                <div class="flex flex-wrap gap-2 mt-1">
-                    <button id="selectAllTrace" class="text-xs bg-slate-200 px-2 py-1 rounded hover:bg-slate-300">Selecionar todas</button>
-                    <button id="clearAllTrace" class="text-xs bg-slate-200 px-2 py-1 rounded hover:bg-slate-300">Limpar</button>
-                    <button id="randomTrace" class="text-xs bg-slate-200 px-2 py-1 rounded hover:bg-slate-300">Aleatório</button>
+                <div class="button-group">
+                    <button id="selectAllTrace">Selecionar todas</button>
+                    <button id="clearAllTrace">Limpar</button>
+                    <button id="randomTrace">Aleatório</button>
                 </div>
             </div>
         `;
@@ -215,12 +215,12 @@
         html += `
             <div class="param-row">
                 <label>Repetições:</label>
-                <input type="number" id="syllableRepeat" value="${customParams.syllableRepeat}" min="1" max="5" class="w-16">
+                <input type="number" id="syllableRepeat" value="${customParams.syllableRepeat}" min="1" max="5">
             </div>
-            <div class="flex flex-wrap gap-2 mt-1">
-                <button id="selectAllSyllables" class="text-xs bg-slate-200 px-2 py-1 rounded hover:bg-slate-300">Selecionar todas</button>
-                <button id="clearAllSyllables" class="text-xs bg-slate-200 px-2 py-1 rounded hover:bg-slate-300">Limpar</button>
-                <button id="randomSyllables" class="text-xs bg-slate-200 px-2 py-1 rounded hover:bg-slate-300">Aleatório</button>
+            <div class="button-group">
+                <button id="selectAllSyllables">Selecionar todas</button>
+                <button id="clearAllSyllables">Limpar</button>
+                <button id="randomSyllables">Aleatório</button>
             </div>
         </div>`;
         return html;
@@ -250,7 +250,7 @@
                 </div>
                 <div class="border-t border-slate-200 my-2 pt-2">
                     <label class="block text-xs font-bold mb-1">Adicionar nova palavra:</label>
-                    <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+                    <div class="flex-row-params">
                         <input type="text" id="newWord" placeholder="Palavra (ex: BOLA)" class="flex-1 text-xs border rounded px-2 py-1">
                         <input type="text" id="newParts" placeholder="Partes separadas por espaço (ex: BO LA)" class="flex-1 text-xs border rounded px-2 py-1">
                         <button id="addWordBtn" class="bg-green-600 text-white px-3 py-1 rounded text-xs font-bold hover:bg-green-700 whitespace-nowrap">
@@ -260,7 +260,7 @@
                 </div>
                 <div class="param-row">
                     <label>Repetições:</label>
-                    <input type="number" id="wordRepeat" value="${customParams.wordRepeat}" min="1" max="5" class="w-16">
+                    <input type="number" id="wordRepeat" value="${customParams.wordRepeat}" min="1" max="5">
                 </div>
             </div>
         `;
@@ -283,7 +283,6 @@
                     });
                 });
 
-                // Selecionar todas
                 document.getElementById('selectAllTrace')?.addEventListener('click', () => {
                     document.querySelectorAll('.trace-letter').forEach(cb => {
                         cb.checked = true;
@@ -294,7 +293,6 @@
                     });
                 });
 
-                // Limpar
                 document.getElementById('clearAllTrace')?.addEventListener('click', () => {
                     document.querySelectorAll('.trace-letter').forEach(cb => {
                         cb.checked = false;
@@ -302,9 +300,7 @@
                     customParams.traceSelected = [];
                 });
 
-                // Aleatório: seleciona ~50% das letras aleatoriamente
                 document.getElementById('randomTrace')?.addEventListener('click', () => {
-                    const allLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
                     const selected = [];
                     document.querySelectorAll('.trace-letter').forEach(cb => {
                         const random = Math.random() > 0.5;
@@ -356,7 +352,6 @@
             }
 
             if (type === 'wordbuilding') {
-                // Adicionar palavra
                 document.getElementById('addWordBtn')?.addEventListener('click', () => {
                     const wordInput = document.getElementById('newWord');
                     const partsInput = document.getElementById('newParts');
@@ -374,7 +369,6 @@
                     }
                 });
 
-                // Remover palavras (delegação)
                 const container = document.getElementById('wordListContainer');
                 if (container) {
                     container.addEventListener('click', (e) => {
