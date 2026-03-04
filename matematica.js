@@ -15,10 +15,10 @@
 
     // ---------- ESTADO LOCAL ----------
     let currentLevelId = 'm2';
-    let itemsPerPage = 8;   // será sincronizado com o select
+    let itemsPerPage = 8;
     let currentZoom = 0.7;
 
-    // Elementos DOM (serão obtidos no init)
+    // Elementos DOM
     let pageLeft, pageRight, levelListDiv, paramPanel, zoomSpan, zoomContainer;
 
     // Parâmetros customizáveis
@@ -139,115 +139,22 @@
 
         switch (level.type) {
             case 'quantity':
-                html = `
-                    <div class="param-control">
-                        <div class="param-row">
-                            <label>Números (separados por vírgula):</label>
-                            <input type="text" id="qtyNumbers" value="${customParams.qtyNumbers.join(',')}" class="w-24">
-                        </div>
-                        <div class="param-row">
-                            <label>Repetições:</label>
-                            <input type="number" id="qtyRepeat" value="${customParams.qtyRepeat}" min="1" max="5" class="w-16">
-                        </div>
-                    </div>
-                `;
+                html = renderQuantityPanel();
                 break;
             case 'math':
-                html = `
-                    <div class="param-control">
-                        <div class="param-row">
-                            <label>Operador:</label>
-                            <select id="mathOperator">
-                                <option value="+" ${customParams.operator === '+' ? 'selected' : ''}>+</option>
-                                <option value="-" ${customParams.operator === '-' ? 'selected' : ''}>-</option>
-                            </select>
-                        </div>
-                        <div class="param-row">
-                            <label>Valor:</label>
-                            <input type="number" id="mathOperand" value="${customParams.operand}" min="1" max="20" class="w-16">
-                        </div>
-                        <div class="param-row">
-                            <label>Mínimo:</label>
-                            <input type="number" id="mathMin" value="${customParams.min}" min="1" max="50" class="w-16">
-                        </div>
-                        <div class="param-row">
-                            <label>Máximo:</label>
-                            <input type="number" id="mathMax" value="${customParams.max}" min="1" max="50" class="w-16">
-                        </div>
-                        <div class="param-row checkbox-row">
-                            <label>Permitir negativo (subtração)?</label>
-                            <input type="checkbox" id="mathAllowNegative" ${customParams.allowNegative ? 'checked' : ''}>
-                        </div>
-                    </div>
-                `;
+                html = renderMathPanel();
                 break;
             case 'sequence':
-                html = `
-                    <div class="param-control">
-                        <div class="param-row checkbox-row">
-                            <label>Usar sequências fixas</label>
-                            <input type="checkbox" id="seqFixed" ${customParams.seqFixed ? 'checked' : ''}>
-                        </div>
-                        <div class="param-row">
-                            <label>Passo (se aleatório):</label>
-                            <input type="number" id="seqStep" value="${customParams.seqStep}" min="1" max="5" class="w-16">
-                        </div>
-                        <div class="param-row">
-                            <label>Comprimento:</label>
-                            <input type="number" id="seqLength" value="${customParams.seqLength}" min="3" max="7" class="w-16">
-                        </div>
-                        <div class="param-row">
-                            <label>Quantidade (se aleatório):</label>
-                            <input type="number" id="seqCount" value="${customParams.seqCount}" min="2" max="8" class="w-16">
-                        </div>
-                    </div>
-                `;
+                html = renderSequencePanel();
                 break;
             case 'tens':
-                html = `
-                    <div class="param-control">
-                        <div class="param-row">
-                            <label>Números (ex: 11,12,13...):</label>
-                            <input type="text" id="tensNumbers" value="${customParams.tensNumbers.join(',')}" class="w-32">
-                        </div>
-                    </div>
-                `;
+                html = renderTensPanel();
                 break;
             case 'compare':
-                html = `
-                    <div class="param-control">
-                        <div class="param-row checkbox-row">
-                            <label>Gerar aleatório</label>
-                            <input type="checkbox" id="compRandom" ${customParams.compRandom ? 'checked' : ''}>
-                        </div>
-                        <div class="param-row">
-                            <label>Pares fixos (ex: 3,5;7,2):</label>
-                            <input type="text" id="compPairs" value="${customParams.compPairs.map(p => p.join(',')).join(';')}" class="w-32">
-                        </div>
-                        <div class="param-row">
-                            <label>Mín (aleatório):</label>
-                            <input type="number" id="compMin" value="${customParams.compMin}" min="1" max="20" class="w-16">
-                        </div>
-                        <div class="param-row">
-                            <label>Máx (aleatório):</label>
-                            <input type="number" id="compMax" value="${customParams.compMax}" min="1" max="20" class="w-16">
-                        </div>
-                        <div class="param-row">
-                            <label>Quantidade (aleatório):</label>
-                            <input type="number" id="compCount" value="${customParams.compCount}" min="2" max="10" class="w-16">
-                        </div>
-                    </div>
-                `;
+                html = renderComparePanel();
                 break;
             case 'neighbors':
-                html = `
-                    <div class="param-control">
-                        <div class="param-row">
-                            <label>Centros (ex: 5,10,15):</label>
-                            <input type="text" id="neighborCenters" value="${customParams.neighborCenters.join(',')}" class="w-32">
-                        </div>
-                    </div>
-                `;
+                html = renderNeighborsPanel();
                 break;
             default:
                 html = '<div class="text-slate-400">Sem parâmetros adicionais.</div>';
@@ -255,6 +162,123 @@
 
         paramPanel.innerHTML = html;
         attachParamEvents(level.type);
+    }
+
+    function renderQuantityPanel() {
+        return `
+            <div class="param-control">
+                <div class="param-row">
+                    <label>Números (separados por vírgula):</label>
+                    <input type="text" id="qtyNumbers" value="${customParams.qtyNumbers.join(',')}">
+                </div>
+                <div class="param-row">
+                    <label>Repetições:</label>
+                    <input type="number" id="qtyRepeat" value="${customParams.qtyRepeat}" min="1" max="5">
+                </div>
+            </div>
+        `;
+    }
+
+    function renderMathPanel() {
+        return `
+            <div class="param-control">
+                <div class="param-row">
+                    <label>Operador:</label>
+                    <select id="mathOperator">
+                        <option value="+" ${customParams.operator === '+' ? 'selected' : ''}>+</option>
+                        <option value="-" ${customParams.operator === '-' ? 'selected' : ''}>-</option>
+                    </select>
+                </div>
+                <div class="param-row">
+                    <label>Valor:</label>
+                    <input type="number" id="mathOperand" value="${customParams.operand}" min="1" max="20">
+                </div>
+                <div class="param-row">
+                    <label>Mínimo:</label>
+                    <input type="number" id="mathMin" value="${customParams.min}" min="1" max="50">
+                </div>
+                <div class="param-row">
+                    <label>Máximo:</label>
+                    <input type="number" id="mathMax" value="${customParams.max}" min="1" max="50">
+                </div>
+                <div class="param-row checkbox-row">
+                    <label>Permitir negativo (subtração)?</label>
+                    <input type="checkbox" id="mathAllowNegative" ${customParams.allowNegative ? 'checked' : ''}>
+                </div>
+            </div>
+        `;
+    }
+
+    function renderSequencePanel() {
+        return `
+            <div class="param-control">
+                <div class="param-row checkbox-row">
+                    <label>Usar sequências fixas</label>
+                    <input type="checkbox" id="seqFixed" ${customParams.seqFixed ? 'checked' : ''}>
+                </div>
+                <div class="param-row">
+                    <label>Passo (se aleatório):</label>
+                    <input type="number" id="seqStep" value="${customParams.seqStep}" min="1" max="5">
+                </div>
+                <div class="param-row">
+                    <label>Comprimento:</label>
+                    <input type="number" id="seqLength" value="${customParams.seqLength}" min="3" max="7">
+                </div>
+                <div class="param-row">
+                    <label>Quantidade (se aleatório):</label>
+                    <input type="number" id="seqCount" value="${customParams.seqCount}" min="2" max="8">
+                </div>
+            </div>
+        `;
+    }
+
+    function renderTensPanel() {
+        return `
+            <div class="param-control">
+                <div class="param-row">
+                    <label>Números (ex: 11,12,13...):</label>
+                    <input type="text" id="tensNumbers" value="${customParams.tensNumbers.join(',')}">
+                </div>
+            </div>
+        `;
+    }
+
+    function renderComparePanel() {
+        return `
+            <div class="param-control">
+                <div class="param-row checkbox-row">
+                    <label>Gerar aleatório</label>
+                    <input type="checkbox" id="compRandom" ${customParams.compRandom ? 'checked' : ''}>
+                </div>
+                <div class="param-row">
+                    <label>Pares fixos (ex: 3,5;7,2):</label>
+                    <input type="text" id="compPairs" value="${customParams.compPairs.map(p => p.join(',')).join(';')}">
+                </div>
+                <div class="param-row">
+                    <label>Mín (aleatório):</label>
+                    <input type="number" id="compMin" value="${customParams.compMin}" min="1" max="20">
+                </div>
+                <div class="param-row">
+                    <label>Máx (aleatório):</label>
+                    <input type="number" id="compMax" value="${customParams.compMax}" min="1" max="20">
+                </div>
+                <div class="param-row">
+                    <label>Quantidade (aleatório):</label>
+                    <input type="number" id="compCount" value="${customParams.compCount}" min="2" max="10">
+                </div>
+            </div>
+        `;
+    }
+
+    function renderNeighborsPanel() {
+        return `
+            <div class="param-control">
+                <div class="param-row">
+                    <label>Centros (ex: 5,10,15):</label>
+                    <input type="text" id="neighborCenters" value="${customParams.neighborCenters.join(',')}">
+                </div>
+            </div>
+        `;
     }
 
     function attachParamEvents(type) {
@@ -325,9 +349,9 @@
         const levels = LevelLibrary.matematica;
         let html = '';
         levels.forEach(lvl => {
-            const active = (lvl.id === currentLevelId) ? 'border-indigo-500 bg-indigo-50' : 'border-slate-100 hover:border-slate-200';
+            const active = (lvl.id === currentLevelId) ? 'border-blue-500 bg-blue-50' : 'border-slate-100 hover:border-blue-200';
             html += `<button onclick="selectLevel('${lvl.id}')" class="w-full text-left p-3 rounded-xl border-2 transition-all ${active}">
-                <div class="text-xs font-bold ${lvl.id === currentLevelId ? 'text-indigo-700' : 'text-slate-600'}">${lvl.title}</div>
+                <div class="text-xs font-bold ${lvl.id === currentLevelId ? 'text-blue-700' : 'text-slate-600'}">${lvl.title}</div>
             </button>`;
         });
         levelListDiv.innerHTML = html;
@@ -353,7 +377,6 @@
     }
 
     function init() {
-        // Agora o DOM está pronto, podemos obter os elementos
         pageLeft = document.getElementById('pageLeft');
         pageRight = document.getElementById('pageRight');
         levelListDiv = document.getElementById('levelList');
