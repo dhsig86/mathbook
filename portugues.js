@@ -1,4 +1,4 @@
-// portugues.js - Lógica específica para Português
+// portugues.js - Lógica específica para Português com interface amigável
 (function() {
     // ---------- BANCO DE DADOS ----------
     const LevelLibrary = {
@@ -7,91 +7,62 @@
                 id: 'p1',
                 title: 'P1 · Alfabeto (traçado)',
                 type: 'trace',
-                letters: ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'],
-                instruction: 'Cubra o pontilhado e treine a letra.'
+                instruction: 'Selecione as letras para treinar.'
             },
             {
                 id: 'p2',
                 title: 'P2 · Sílabas simples',
                 type: 'syllables',
-                syllables: [
-                    'BA','BE','BI','BO','BU','CA','CE','CI','CO','CU',
-                    'DA','DE','DI','DO','DU','FA','FE','FI','FO','FU',
-                    'GA','GE','GI','GO','GU','JA','JE','JI','JO','JU',
-                    'LA','LE','LI','LO','LU','MA','ME','MI','MO','MU',
-                    'NA','NE','NI','NO','NU','PA','PE','PI','PO','PU',
-                    'RA','RE','RI','RO','RU','SA','SE','SI','SO','SU',
-                    'TA','TE','TI','TO','TU','VA','VE','VI','VO','VU',
-                    'ZA','ZE','ZI','ZO','ZU'
-                ],
-                instruction: 'Leia e copie as sílabas.'
+                instruction: 'Escolha as famílias silábicas.'
             },
             {
                 id: 'p3',
                 title: 'P3 · Palavras curtas (2 sílabas)',
                 type: 'wordbuilding',
-                words: [
-                    { word: 'BOLA', parts: ['BO','LA'] },
-                    { word: 'CASA', parts: ['CA','SA'] },
-                    { word: 'DADO', parts: ['DA','DO'] },
-                    { word: 'FOCA', parts: ['FO','CA'] },
-                    { word: 'GATO', parts: ['GA','TO'] },
-                    { word: 'JACA', parts: ['JA','CA'] },
-                    { word: 'LIMA', parts: ['LI','MA'] },
-                    { word: 'MALA', parts: ['MA','LA'] },
-                    { word: 'NOVE', parts: ['NO','VE'] },
-                    { word: 'PATO', parts: ['PA','TO'] },
-                    { word: 'RATO', parts: ['RA','TO'] },
-                    { word: 'SAPO', parts: ['SA','PO'] },
-                    { word: 'TATU', parts: ['TA','TU'] },
-                    { word: 'VACA', parts: ['VA','CA'] }
-                ],
-                instruction: 'Junte as sílabas e forme a palavra.'
+                instruction: 'Adicione palavras e suas sílabas.'
             },
             {
                 id: 'p4',
                 title: 'P4 · Palavras com 3 ou 4 sílabas',
                 type: 'wordbuilding',
-                words: [
-                    { word: 'BANANA', parts: ['BA','NA','NA'] },
-                    { word: 'CADEIRA', parts: ['CA','DEI','RA'] },
-                    { word: 'DINOSSAURO', parts: ['DI','NOS','SAU','RO'] },
-                    { word: 'FABRICA', parts: ['FA','BRI','CA'] },
-                    { word: 'GALINHA', parts: ['GA','LI','NHA'] },
-                    { word: 'JABUTI', parts: ['JA','BU','TI'] },
-                    { word: 'LARANJA', parts: ['LA','RAN','JA'] },
-                    { word: 'MADEIRA', parts: ['MA','DEI','RA'] },
-                    { word: 'NARIZ', parts: ['NA','RIZ'] },
-                    { word: 'PAPAGAIO', parts: ['PA','PA','GAI','O'] }
-                ],
-                instruction: 'Junte as sílabas e forme a palavra.'
+                instruction: 'Adicione palavras mais longas.'
             }
         ]
     };
 
-    // ---------- ESTADO ----------
+    // ---------- ESTADO LOCAL ----------
     let currentLevelId = 'p1';
     let itemsPerPage = 8;
     let currentZoom = 0.7;
 
-    // Elementos DOM (serão obtidos no init)
+    // Elementos DOM
     let pageLeft, pageRight, levelListDiv, paramPanel, zoomSpan, zoomContainer;
 
-    // Parâmetros customizáveis
+    // ---------- PARÂMETROS CUSTOMIZÁVEIS (com valores padrão) ----------
     let customParams = {
-        traceLetters: ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'],
+        // Para trace (alfabeto)
+        traceSelected: [],  // letras selecionadas (inicialmente vazio, será preenchido com todas)
         traceRepeat: 2,
-        syllableList: [
-            'BA','BE','BI','BO','BU','CA','CE','CI','CO','CU',
-            'DA','DE','DI','DO','DU','FA','FE','FI','FO','FU',
-            'GA','GE','GI','GO','GU','JA','JE','JI','JO','JU',
-            'LA','LE','LI','LO','LU','MA','ME','MI','MO','MU',
-            'NA','NE','NI','NO','NU','PA','PE','PI','PO','PU',
-            'RA','RE','RI','RO','RU','SA','SE','SI','SO','SU',
-            'TA','TE','TI','TO','TU','VA','VE','VI','VO','VU',
-            'ZA','ZE','ZI','ZO','ZU'
-        ],
+        // Para syllables
+        syllableFamilies: {
+            'BA': true, 'BE': true, 'BI': true, 'BO': true, 'BU': true,
+            'CA': true, 'CE': true, 'CI': true, 'CO': true, 'CU': true,
+            'DA': true, 'DE': true, 'DI': true, 'DO': true, 'DU': true,
+            'FA': true, 'FE': true, 'FI': true, 'FO': true, 'FU': true,
+            'GA': true, 'GE': true, 'GI': true, 'GO': true, 'GU': true,
+            'JA': true, 'JE': true, 'JI': true, 'JO': true, 'JU': true,
+            'LA': true, 'LE': true, 'LI': true, 'LO': true, 'LU': true,
+            'MA': true, 'ME': true, 'MI': true, 'MO': true, 'MU': true,
+            'NA': true, 'NE': true, 'NI': true, 'NO': true, 'NU': true,
+            'PA': true, 'PE': true, 'PI': true, 'PO': true, 'PU': true,
+            'RA': true, 'RE': true, 'RI': true, 'RO': true, 'RU': true,
+            'SA': true, 'SE': true, 'SI': true, 'SO': true, 'SU': true,
+            'TA': true, 'TE': true, 'TI': true, 'TO': true, 'TU': true,
+            'VA': true, 'VE': true, 'VI': true, 'VO': true, 'VU': true,
+            'ZA': true, 'ZE': true, 'ZI': true, 'ZO': true, 'ZU': true
+        },
         syllableRepeat: 2,
+        // Para wordbuilding
         wordList: [
             { word: 'BOLA', parts: ['BO','LA'] },
             { word: 'CASA', parts: ['CA','SA'] },
@@ -111,7 +82,7 @@
         wordRepeat: 2
     };
 
-    // ---------- FUNÇÕES DE GERAÇÃO DE ITENS POR TIPO ----------
+    // ---------- FUNÇÕES DE GERAÇÃO DE ITENS ----------
     function generateItemsForLevel(level) {
         if (!level) return [];
 
@@ -119,7 +90,8 @@
 
         switch (level.type) {
             case 'trace':
-                customParams.traceLetters.forEach(letter => {
+                // Usa apenas as letras selecionadas
+                customParams.traceSelected.forEach(letter => {
                     for (let i = 0; i < customParams.traceRepeat; i++) {
                         baseItems.push({ type: 'trace', char: letter });
                     }
@@ -127,7 +99,9 @@
                 break;
 
             case 'syllables':
-                customParams.syllableList.forEach(syllable => {
+                // Filtra as famílias selecionadas
+                const selectedSyllables = Object.keys(customParams.syllableFamilies).filter(s => customParams.syllableFamilies[s]);
+                selectedSyllables.forEach(syllable => {
                     for (let i = 0; i < customParams.syllableRepeat; i++) {
                         baseItems.push({ type: 'syllable', syllable: syllable });
                     }
@@ -164,51 +138,14 @@
 
         switch (level.type) {
             case 'trace':
-                html = `
-                    <div class="param-control">
-                        <div class="param-row">
-                            <label>Letras (separadas por vírgula):</label>
-                            <input type="text" id="traceLetters" value="${customParams.traceLetters.join(',')}" class="w-32">
-                        </div>
-                        <div class="param-row">
-                            <label>Repetições:</label>
-                            <input type="number" id="traceRepeat" value="${customParams.traceRepeat}" min="1" max="5" class="w-16">
-                        </div>
-                    </div>
-                `;
+                html = renderTracePanel();
                 break;
-
             case 'syllables':
-                html = `
-                    <div class="param-control">
-                        <div class="param-row">
-                            <label>Sílabas (separadas por vírgula):</label>
-                            <input type="text" id="syllableList" value="${customParams.syllableList.join(',')}" class="w-32">
-                        </div>
-                        <div class="param-row">
-                            <label>Repetições:</label>
-                            <input type="number" id="syllableRepeat" value="${customParams.syllableRepeat}" min="1" max="5" class="w-16">
-                        </div>
-                    </div>
-                `;
+                html = renderSyllablesPanel();
                 break;
-
             case 'wordbuilding':
-                let wordString = customParams.wordList.map(w => `${w.word}:${w.parts.join(',')}`).join('; ');
-                html = `
-                    <div class="param-control">
-                        <div class="param-row">
-                            <label>Palavras (formato PALAVRA:par1,par2):</label>
-                            <input type="text" id="wordList" value="${wordString}" class="w-32">
-                        </div>
-                        <div class="param-row">
-                            <label>Repetições:</label>
-                            <input type="number" id="wordRepeat" value="${customParams.wordRepeat}" min="1" max="5" class="w-16">
-                        </div>
-                    </div>
-                `;
+                html = renderWordPanel();
                 break;
-
             default:
                 html = '<div class="text-slate-400">Sem parâmetros adicionais.</div>';
         }
@@ -217,44 +154,223 @@
         attachParamEvents(level.type);
     }
 
+    function renderTracePanel() {
+        // Criar checkboxes para todas as letras do alfabeto
+        const allLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+        let checkboxes = '';
+        allLetters.forEach(letter => {
+            const checked = customParams.traceSelected.includes(letter) ? 'checked' : '';
+            checkboxes += `
+                <label class="inline-flex items-center gap-1 mr-2 mb-1">
+                    <input type="checkbox" class="trace-letter" value="${letter}" ${checked}>
+                    <span class="text-xs">${letter}</span>
+                </label>
+            `;
+        });
+
+        return `
+            <div class="param-control">
+                <div class="mb-2">
+                    <label class="block text-xs font-bold mb-1">Letras para treinar:</label>
+                    <div class="bg-white p-2 rounded max-h-40 overflow-y-auto border border-slate-200">
+                        ${checkboxes}
+                    </div>
+                </div>
+                <div class="param-row">
+                    <label>Repetições:</label>
+                    <input type="number" id="traceRepeat" value="${customParams.traceRepeat}" min="1" max="5" class="w-16">
+                </div>
+                <div class="flex gap-2 mt-1">
+                    <button id="selectAllTrace" class="text-xs bg-slate-200 px-2 py-1 rounded">Selecionar todas</button>
+                    <button id="clearAllTrace" class="text-xs bg-slate-200 px-2 py-1 rounded">Limpar</button>
+                </div>
+            </div>
+        `;
+    }
+
+    function renderSyllablesPanel() {
+        // Agrupar por família (primeira letra) para facilitar
+        const families = {};
+        Object.keys(customParams.syllableFamilies).sort().forEach(s => {
+            const first = s[0];
+            if (!families[first]) families[first] = [];
+            families[first].push(s);
+        });
+
+        let html = '<div class="param-control">';
+        html += '<div class="mb-2"><label class="block text-xs font-bold mb-1">Famílias silábicas:</label>';
+        html += '<div class="bg-white p-2 rounded max-h-60 overflow-y-auto border border-slate-200">';
+
+        for (let letter in families) {
+            html += `<div class="font-bold text-xs mt-1">${letter}</div>`;
+            families[letter].forEach(syl => {
+                const checked = customParams.syllableFamilies[syl] ? 'checked' : '';
+                html += `
+                    <label class="inline-flex items-center gap-1 mr-3 mb-1">
+                        <input type="checkbox" class="syllable-item" value="${syl}" ${checked}>
+                        <span class="text-xs">${syl}</span>
+                    </label>
+                `;
+            });
+        }
+
+        html += '</div></div>';
+        html += `
+            <div class="param-row">
+                <label>Repetições:</label>
+                <input type="number" id="syllableRepeat" value="${customParams.syllableRepeat}" min="1" max="5" class="w-16">
+            </div>
+            <div class="flex gap-2 mt-1">
+                <button id="selectAllSyllables" class="text-xs bg-slate-200 px-2 py-1 rounded">Selecionar todas</button>
+                <button id="clearAllSyllables" class="text-xs bg-slate-200 px-2 py-1 rounded">Limpar</button>
+            </div>
+        </div>`;
+        return html;
+    }
+
+    function renderWordPanel() {
+        // Exibe a lista atual de palavras com botões de remover
+        let wordItems = '';
+        customParams.wordList.forEach((w, index) => {
+            wordItems += `
+                <div class="flex items-center justify-between bg-slate-100 p-1 mb-1 rounded">
+                    <span class="text-xs font-bold">${w.word}</span>
+                    <span class="text-xs">[${w.parts.join(' ')}]</span>
+                    <button class="remove-word text-red-500 hover:text-red-700" data-index="${index}">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+        });
+
+        return `
+            <div class="param-control">
+                <div class="mb-2">
+                    <label class="block text-xs font-bold mb-1">Palavras cadastradas:</label>
+                    <div id="wordListContainer" class="bg-white p-2 rounded max-h-40 overflow-y-auto border border-slate-200">
+                        ${wordItems || '<div class="text-slate-400 text-xs">Nenhuma palavra</div>'}
+                    </div>
+                </div>
+                <div class="border-t border-slate-200 my-2 pt-2">
+                    <label class="block text-xs font-bold mb-1">Adicionar nova palavra:</label>
+                    <div class="flex gap-1 mb-1">
+                        <input type="text" id="newWord" placeholder="Palavra" class="w-20 text-xs border rounded px-1">
+                        <input type="text" id="newParts" placeholder="partes separadas por espaço" class="flex-1 text-xs border rounded px-1">
+                        <button id="addWordBtn" class="bg-indigo-100 text-indigo-700 px-2 py-1 rounded text-xs">Adicionar</button>
+                    </div>
+                </div>
+                <div class="param-row">
+                    <label>Repetições:</label>
+                    <input type="number" id="wordRepeat" value="${customParams.wordRepeat}" min="1" max="5" class="w-16">
+                </div>
+            </div>
+        `;
+    }
+
     function attachParamEvents(type) {
+        // Como os eventos são dinâmicos, usamos setTimeout para garantir que os elementos existam
         setTimeout(() => {
             if (type === 'trace') {
-                const inpLetters = document.getElementById('traceLetters');
-                const inpRepeat = document.getElementById('traceRepeat');
-                if (inpLetters) inpLetters.addEventListener('change', (e) => {
-                    customParams.traceLetters = e.target.value.split(',').map(s => s.trim()).filter(s => s.length > 0);
+                // Checkboxes das letras
+                document.querySelectorAll('.trace-letter').forEach(cb => {
+                    cb.addEventListener('change', (e) => {
+                        const letter = e.target.value;
+                        if (e.target.checked) {
+                            if (!customParams.traceSelected.includes(letter)) {
+                                customParams.traceSelected.push(letter);
+                            }
+                        } else {
+                            customParams.traceSelected = customParams.traceSelected.filter(l => l !== letter);
+                        }
+                    });
                 });
-                if (inpRepeat) inpRepeat.addEventListener('change', (e) => {
+
+                // Botões selecionar/limpar
+                document.getElementById('selectAllTrace')?.addEventListener('click', () => {
+                    document.querySelectorAll('.trace-letter').forEach(cb => {
+                        cb.checked = true;
+                        const letter = cb.value;
+                        if (!customParams.traceSelected.includes(letter)) {
+                            customParams.traceSelected.push(letter);
+                        }
+                    });
+                });
+                document.getElementById('clearAllTrace')?.addEventListener('click', () => {
+                    document.querySelectorAll('.trace-letter').forEach(cb => {
+                        cb.checked = false;
+                    });
+                    customParams.traceSelected = [];
+                });
+
+                // Repetições
+                const repeat = document.getElementById('traceRepeat');
+                if (repeat) repeat.addEventListener('change', (e) => {
                     customParams.traceRepeat = parseInt(e.target.value) || 2;
                 });
             }
+
             if (type === 'syllables') {
-                const inpSyl = document.getElementById('syllableList');
-                const inpRepeat = document.getElementById('syllableRepeat');
-                if (inpSyl) inpSyl.addEventListener('change', (e) => {
-                    customParams.syllableList = e.target.value.split(',').map(s => s.trim()).filter(s => s.length > 0);
+                // Checkboxes das sílabas
+                document.querySelectorAll('.syllable-item').forEach(cb => {
+                    cb.addEventListener('change', (e) => {
+                        const syl = e.target.value;
+                        customParams.syllableFamilies[syl] = e.target.checked;
+                    });
                 });
-                if (inpRepeat) inpRepeat.addEventListener('change', (e) => {
+
+                // Botões selecionar/limpar
+                document.getElementById('selectAllSyllables')?.addEventListener('click', () => {
+                    document.querySelectorAll('.syllable-item').forEach(cb => {
+                        cb.checked = true;
+                        customParams.syllableFamilies[cb.value] = true;
+                    });
+                });
+                document.getElementById('clearAllSyllables')?.addEventListener('click', () => {
+                    document.querySelectorAll('.syllable-item').forEach(cb => {
+                        cb.checked = false;
+                        customParams.syllableFamilies[cb.value] = false;
+                    });
+                });
+
+                const repeat = document.getElementById('syllableRepeat');
+                if (repeat) repeat.addEventListener('change', (e) => {
                     customParams.syllableRepeat = parseInt(e.target.value) || 2;
                 });
             }
+
             if (type === 'wordbuilding') {
-                const inpWords = document.getElementById('wordList');
-                const inpRepeat = document.getElementById('wordRepeat');
-                if (inpWords) inpWords.addEventListener('change', (e) => {
-                    const parts = e.target.value.split(';').map(s => s.trim());
-                    const newWords = [];
-                    parts.forEach(p => {
-                        const [word, rest] = p.split(':');
-                        if (word && rest) {
-                            const syls = rest.split(',').map(s => s.trim());
-                            newWords.push({ word: word.trim(), parts: syls });
+                // Botão adicionar palavra
+                document.getElementById('addWordBtn')?.addEventListener('click', () => {
+                    const wordInput = document.getElementById('newWord');
+                    const partsInput = document.getElementById('newParts');
+                    if (wordInput.value.trim() && partsInput.value.trim()) {
+                        const newWord = {
+                            word: wordInput.value.trim().toUpperCase(),
+                            parts: partsInput.value.trim().split(/\s+/).map(p => p.toUpperCase())
+                        };
+                        customParams.wordList.push(newWord);
+                        // Atualiza o painel para mostrar a nova lista
+                        updateParamPanel();
+                    }
+                });
+
+                // Botões remover (são gerados dinamicamente, então usamos delegação no container)
+                const container = document.getElementById('wordListContainer');
+                if (container) {
+                    container.addEventListener('click', (e) => {
+                        if (e.target.closest('.remove-word')) {
+                            const btn = e.target.closest('.remove-word');
+                            const index = btn.getAttribute('data-index');
+                            if (index !== null) {
+                                customParams.wordList.splice(parseInt(index), 1);
+                                updateParamPanel();
+                            }
                         }
                     });
-                    if (newWords.length > 0) customParams.wordList = newWords;
-                });
-                if (inpRepeat) inpRepeat.addEventListener('change', (e) => {
+                }
+
+                const repeat = document.getElementById('wordRepeat');
+                if (repeat) repeat.addEventListener('change', (e) => {
                     customParams.wordRepeat = parseInt(e.target.value) || 2;
                 });
             }
@@ -277,6 +393,11 @@
 
     window.selectLevel = function(id) {
         currentLevelId = id;
+        // Inicializa parâmetros padrão de acordo com o nível
+        if (id === 'p1' && customParams.traceSelected.length === 0) {
+            // Se for a primeira vez, seleciona todas as letras por padrão
+            customParams.traceSelected = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+        }
         renderLevelList();
         updateParamPanel();
         refreshPreview();
@@ -297,7 +418,6 @@
 
     // ---------- INICIALIZAÇÃO ----------
     function init() {
-        // Obtém referências DOM
         pageLeft = document.getElementById('pageLeft');
         pageRight = document.getElementById('pageRight');
         levelListDiv = document.getElementById('levelList');
@@ -305,8 +425,12 @@
         zoomSpan = document.getElementById('zoomValue');
         zoomContainer = document.getElementById('zoomContainer');
 
-        // Inicializa o gerador (KumonGen.initRefs)
         KumonGen.initRefs();
+
+        // Inicializa traceSelected com todas as letras por padrão
+        if (customParams.traceSelected.length === 0) {
+            customParams.traceSelected = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+        }
 
         renderLevelList();
         updateParamPanel();
@@ -324,12 +448,10 @@
         if (zoomContainer) zoomContainer.style.transform = `scale(${currentZoom})`;
     }
 
-    // Expõe funções globais para os botões
     window.adjustZoom = KumonGen.adjustZoom;
     window.generatePDF = () => KumonGen.generatePDF('a4-sheet');
     window.refreshPreview = refreshPreview;
 
-    // Inicia quando o DOM estiver pronto
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init);
     } else {
