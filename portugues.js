@@ -38,10 +38,10 @@
     // Elementos DOM
     let pageLeft, pageRight, levelListDiv, paramPanel, zoomSpan, zoomContainer;
 
-    // ---------- PARÂMETROS CUSTOMIZÁVEIS (com valores padrão) ----------
+    // ---------- PARÂMETROS CUSTOMIZÁVEIS ----------
     let customParams = {
-        // Para trace (alfabeto)
-        traceSelected: [],  // letras selecionadas (inicialmente vazio, será preenchido com todas)
+        // Para trace
+        traceSelected: [],  // será preenchido com todas no init
         traceRepeat: 2,
         // Para syllables
         syllableFamilies: {
@@ -90,7 +90,6 @@
 
         switch (level.type) {
             case 'trace':
-                // Usa apenas as letras selecionadas
                 customParams.traceSelected.forEach(letter => {
                     for (let i = 0; i < customParams.traceRepeat; i++) {
                         baseItems.push({ type: 'trace', char: letter });
@@ -99,7 +98,6 @@
                 break;
 
             case 'syllables':
-                // Filtra as famílias selecionadas
                 const selectedSyllables = Object.keys(customParams.syllableFamilies).filter(s => customParams.syllableFamilies[s]);
                 selectedSyllables.forEach(syllable => {
                     for (let i = 0; i < customParams.syllableRepeat; i++) {
@@ -129,7 +127,7 @@
         return result;
     }
 
-    // ---------- PAINEL DE PARÂMETROS DINÂMICO ----------
+    // ---------- PAINEL DE PARÂMETROS ----------
     function updateParamPanel() {
         const level = LevelLibrary.portugues.find(l => l.id === currentLevelId);
         if (!level || !paramPanel) return;
@@ -155,7 +153,6 @@
     }
 
     function renderTracePanel() {
-        // Criar checkboxes para todas as letras do alfabeto
         const allLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
         let checkboxes = '';
         allLetters.forEach(letter => {
@@ -180,16 +177,16 @@
                     <label>Repetições:</label>
                     <input type="number" id="traceRepeat" value="${customParams.traceRepeat}" min="1" max="5" class="w-16">
                 </div>
-                <div class="flex gap-2 mt-1">
-                    <button id="selectAllTrace" class="text-xs bg-slate-200 px-2 py-1 rounded">Selecionar todas</button>
-                    <button id="clearAllTrace" class="text-xs bg-slate-200 px-2 py-1 rounded">Limpar</button>
+                <div class="flex flex-wrap gap-2 mt-1">
+                    <button id="selectAllTrace" class="text-xs bg-slate-200 px-2 py-1 rounded hover:bg-slate-300">Selecionar todas</button>
+                    <button id="clearAllTrace" class="text-xs bg-slate-200 px-2 py-1 rounded hover:bg-slate-300">Limpar</button>
+                    <button id="randomTrace" class="text-xs bg-slate-200 px-2 py-1 rounded hover:bg-slate-300">Aleatório</button>
                 </div>
             </div>
         `;
     }
 
     function renderSyllablesPanel() {
-        // Agrupar por família (primeira letra) para facilitar
         const families = {};
         Object.keys(customParams.syllableFamilies).sort().forEach(s => {
             const first = s[0];
@@ -220,22 +217,22 @@
                 <label>Repetições:</label>
                 <input type="number" id="syllableRepeat" value="${customParams.syllableRepeat}" min="1" max="5" class="w-16">
             </div>
-            <div class="flex gap-2 mt-1">
-                <button id="selectAllSyllables" class="text-xs bg-slate-200 px-2 py-1 rounded">Selecionar todas</button>
-                <button id="clearAllSyllables" class="text-xs bg-slate-200 px-2 py-1 rounded">Limpar</button>
+            <div class="flex flex-wrap gap-2 mt-1">
+                <button id="selectAllSyllables" class="text-xs bg-slate-200 px-2 py-1 rounded hover:bg-slate-300">Selecionar todas</button>
+                <button id="clearAllSyllables" class="text-xs bg-slate-200 px-2 py-1 rounded hover:bg-slate-300">Limpar</button>
+                <button id="randomSyllables" class="text-xs bg-slate-200 px-2 py-1 rounded hover:bg-slate-300">Aleatório</button>
             </div>
         </div>`;
         return html;
     }
 
     function renderWordPanel() {
-        // Exibe a lista atual de palavras com botões de remover
         let wordItems = '';
         customParams.wordList.forEach((w, index) => {
             wordItems += `
                 <div class="flex items-center justify-between bg-slate-100 p-1 mb-1 rounded">
                     <span class="text-xs font-bold">${w.word}</span>
-                    <span class="text-xs">[${w.parts.join(' ')}]</span>
+                    <span class="text-xs text-slate-600">[${w.parts.join(' ')}]</span>
                     <button class="remove-word text-red-500 hover:text-red-700" data-index="${index}">
                         <i class="fas fa-times"></i>
                     </button>
@@ -253,10 +250,12 @@
                 </div>
                 <div class="border-t border-slate-200 my-2 pt-2">
                     <label class="block text-xs font-bold mb-1">Adicionar nova palavra:</label>
-                    <div class="flex gap-1 mb-1">
-                        <input type="text" id="newWord" placeholder="Palavra" class="w-20 text-xs border rounded px-1">
-                        <input type="text" id="newParts" placeholder="partes separadas por espaço" class="flex-1 text-xs border rounded px-1">
-                        <button id="addWordBtn" class="bg-indigo-100 text-indigo-700 px-2 py-1 rounded text-xs">Adicionar</button>
+                    <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+                        <input type="text" id="newWord" placeholder="Palavra (ex: BOLA)" class="flex-1 text-xs border rounded px-2 py-1">
+                        <input type="text" id="newParts" placeholder="Partes separadas por espaço (ex: BO LA)" class="flex-1 text-xs border rounded px-2 py-1">
+                        <button id="addWordBtn" class="bg-green-600 text-white px-3 py-1 rounded text-xs font-bold hover:bg-green-700 whitespace-nowrap">
+                            <i class="fas fa-plus mr-1"></i>Adicionar
+                        </button>
                     </div>
                 </div>
                 <div class="param-row">
@@ -268,10 +267,9 @@
     }
 
     function attachParamEvents(type) {
-        // Como os eventos são dinâmicos, usamos setTimeout para garantir que os elementos existam
         setTimeout(() => {
             if (type === 'trace') {
-                // Checkboxes das letras
+                // Checkboxes
                 document.querySelectorAll('.trace-letter').forEach(cb => {
                     cb.addEventListener('change', (e) => {
                         const letter = e.target.value;
@@ -285,7 +283,7 @@
                     });
                 });
 
-                // Botões selecionar/limpar
+                // Selecionar todas
                 document.getElementById('selectAllTrace')?.addEventListener('click', () => {
                     document.querySelectorAll('.trace-letter').forEach(cb => {
                         cb.checked = true;
@@ -295,6 +293,8 @@
                         }
                     });
                 });
+
+                // Limpar
                 document.getElementById('clearAllTrace')?.addEventListener('click', () => {
                     document.querySelectorAll('.trace-letter').forEach(cb => {
                         cb.checked = false;
@@ -302,7 +302,18 @@
                     customParams.traceSelected = [];
                 });
 
-                // Repetições
+                // Aleatório: seleciona ~50% das letras aleatoriamente
+                document.getElementById('randomTrace')?.addEventListener('click', () => {
+                    const allLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+                    const selected = [];
+                    document.querySelectorAll('.trace-letter').forEach(cb => {
+                        const random = Math.random() > 0.5;
+                        cb.checked = random;
+                        if (random) selected.push(cb.value);
+                    });
+                    customParams.traceSelected = selected;
+                });
+
                 const repeat = document.getElementById('traceRepeat');
                 if (repeat) repeat.addEventListener('change', (e) => {
                     customParams.traceRepeat = parseInt(e.target.value) || 2;
@@ -310,25 +321,31 @@
             }
 
             if (type === 'syllables') {
-                // Checkboxes das sílabas
                 document.querySelectorAll('.syllable-item').forEach(cb => {
                     cb.addEventListener('change', (e) => {
-                        const syl = e.target.value;
-                        customParams.syllableFamilies[syl] = e.target.checked;
+                        customParams.syllableFamilies[e.target.value] = e.target.checked;
                     });
                 });
 
-                // Botões selecionar/limpar
                 document.getElementById('selectAllSyllables')?.addEventListener('click', () => {
                     document.querySelectorAll('.syllable-item').forEach(cb => {
                         cb.checked = true;
                         customParams.syllableFamilies[cb.value] = true;
                     });
                 });
+
                 document.getElementById('clearAllSyllables')?.addEventListener('click', () => {
                     document.querySelectorAll('.syllable-item').forEach(cb => {
                         cb.checked = false;
                         customParams.syllableFamilies[cb.value] = false;
+                    });
+                });
+
+                document.getElementById('randomSyllables')?.addEventListener('click', () => {
+                    document.querySelectorAll('.syllable-item').forEach(cb => {
+                        const random = Math.random() > 0.5;
+                        cb.checked = random;
+                        customParams.syllableFamilies[cb.value] = random;
                     });
                 });
 
@@ -339,7 +356,7 @@
             }
 
             if (type === 'wordbuilding') {
-                // Botão adicionar palavra
+                // Adicionar palavra
                 document.getElementById('addWordBtn')?.addEventListener('click', () => {
                     const wordInput = document.getElementById('newWord');
                     const partsInput = document.getElementById('newParts');
@@ -349,12 +366,15 @@
                             parts: partsInput.value.trim().split(/\s+/).map(p => p.toUpperCase())
                         };
                         customParams.wordList.push(newWord);
-                        // Atualiza o painel para mostrar a nova lista
+                        wordInput.value = '';
+                        partsInput.value = '';
                         updateParamPanel();
+                    } else {
+                        alert('Preencha a palavra e as partes!');
                     }
                 });
 
-                // Botões remover (são gerados dinamicamente, então usamos delegação no container)
+                // Remover palavras (delegação)
                 const container = document.getElementById('wordListContainer');
                 if (container) {
                     container.addEventListener('click', (e) => {
@@ -377,15 +397,14 @@
         }, 50);
     }
 
-    // ---------- RENDERIZAÇÃO DA LISTA DE NÍVEIS ----------
     function renderLevelList() {
         if (!levelListDiv) return;
         const levels = LevelLibrary.portugues;
         let html = '';
         levels.forEach(lvl => {
-            const active = (lvl.id === currentLevelId) ? 'border-indigo-500 bg-indigo-50' : 'border-slate-100 hover:border-slate-200';
+            const active = (lvl.id === currentLevelId) ? 'border-green-500 bg-green-50' : 'border-slate-100 hover:border-green-200';
             html += `<button onclick="selectLevel('${lvl.id}')" class="w-full text-left p-3 rounded-xl border-2 transition-all ${active}">
-                <div class="text-xs font-bold ${lvl.id === currentLevelId ? 'text-indigo-700' : 'text-slate-600'}">${lvl.title}</div>
+                <div class="text-xs font-bold ${lvl.id === currentLevelId ? 'text-green-700' : 'text-slate-600'}">${lvl.title}</div>
             </button>`;
         });
         levelListDiv.innerHTML = html;
@@ -393,9 +412,7 @@
 
     window.selectLevel = function(id) {
         currentLevelId = id;
-        // Inicializa parâmetros padrão de acordo com o nível
         if (id === 'p1' && customParams.traceSelected.length === 0) {
-            // Se for a primeira vez, seleciona todas as letras por padrão
             customParams.traceSelected = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
         }
         renderLevelList();
@@ -403,7 +420,6 @@
         refreshPreview();
     };
 
-    // ---------- REFRESH PREVIEW ----------
     function refreshPreview() {
         const level = LevelLibrary.portugues.find(l => l.id === currentLevelId);
         if (!level) return;
@@ -416,7 +432,6 @@
         KumonGen.buildPage(pageRight, level, 2, rightItems);
     }
 
-    // ---------- INICIALIZAÇÃO ----------
     function init() {
         pageLeft = document.getElementById('pageLeft');
         pageRight = document.getElementById('pageRight');
@@ -427,7 +442,6 @@
 
         KumonGen.initRefs();
 
-        // Inicializa traceSelected com todas as letras por padrão
         if (customParams.traceSelected.length === 0) {
             customParams.traceSelected = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
         }
