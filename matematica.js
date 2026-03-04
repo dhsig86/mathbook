@@ -34,7 +34,9 @@
         seqStep: 1,
         seqLength: 5,
         seqCount: 4,
-        tensNumbers: [11,12,13,14,15,16,17,18,19],
+        seqHoles: 1, // novo: número de lacunas
+        tensDezena: 1, // novo: dezena (ex: 1 para 10-19)
+        tensSequencial: true, // novo: se true, ordem crescente; se false, aleatório
         compPairs: [[3,5],[7,2],[4,4],[6,9]],
         compRandom: false,
         compMin: 1,
@@ -78,20 +80,44 @@
                     baseItems = level.sequences.map(seq => ({ type: 'sequence', sequence: seq }));
                 } else {
                     for (let s = 0; s < customParams.seqCount; s++) {
-                        let start = Math.floor(Math.random() * 5) + 1;
+                        let start = Math.floor(Math.random() * 5) + 1; // início aleatório entre 1 e 5
                         let seq = [];
+                        // Gera a sequência completa
                         for (let j = 0; j < customParams.seqLength; j++) {
-                            if (j === 2) seq.push('__');
-                            else seq.push(start + j * customParams.seqStep);
+                            seq.push(start + j * customParams.seqStep);
                         }
+                        // Escolhe posições aleatórias para as lacunas
+                        let holePositions = [];
+                        while (holePositions.length < customParams.seqHoles) {
+                            let pos = Math.floor(Math.random() * customParams.seqLength);
+                            if (!holePositions.includes(pos)) {
+                                holePositions.push(pos);
+                            }
+                        }
+                        // Substitui por '__'
+                        holePositions.forEach(pos => {
+                            seq[pos] = '__';
+                        });
                         baseItems.push({ type: 'sequence', sequence: seq });
                     }
                 }
                 break;
 
             case 'tens':
-                customParams.tensNumbers.forEach(n => {
-                    baseItems.push({ type: 'tens', number: n });
+                // Gera números da dezena escolhida
+                let dezena = customParams.tensDezena;
+                let minNum = dezena * 10;
+                let maxNum = dezena * 10 + 9;
+                let allNumbers = [];
+                for (let n = minNum; n <= maxNum; n++) {
+                    allNumbers.push(n);
+                }
+                // Se sequencial, mantém ordem; se não, embaralha
+                if (!customParams.tensSequencial) {
+                    allNumbers = shuffleArray(allNumbers);
+                }
+                // Cria itens base (cada número uma vez, depois repetirá ciclicamente)
+                allNumbers.forEach(n => {
                     baseItems.push({ type: 'tens', number: n });
                 });
                 break;
@@ -128,6 +154,15 @@
             result.push({ ...baseItems[i % baseItems.length] });
         }
         return result;
+    }
+
+    // Função auxiliar para embaralhar array (Fisher-Yates)
+    function shuffleArray(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
     }
 
     // ---------- PAINEL DE PARÂMETROS ----------
@@ -225,6 +260,10 @@
                     <input type="number" id="seqLength" value="${customParams.seqLength}" min="3" max="7">
                 </div>
                 <div class="param-row">
+                    <label>Número de lacunas:</label>
+                    <input type="number" id="seqHoles" value="${customParams.seqHoles}" min="1" max="3">
+                </div>
+                <div class="param-row">
                     <label>Quantidade (se aleatório):</label>
                     <input type="number" id="seqCount" value="${customParams.seqCount}" min="2" max="8">
                 </div>
@@ -236,8 +275,12 @@
         return `
             <div class="param-control">
                 <div class="param-row">
-                    <label>Números (ex: 11,12,13...):</label>
-                    <input type="text" id="tensNumbers" value="${customParams.tensNumbers.join(',')}">
+                    <label>Dezena (1 a 9):</label>
+                    <input type="number" id="tensDezena" value="${customParams.tensDezena}" min="1" max="9">
+                </div>
+                <div class="param-row checkbox-row">
+                    <label>Sequencial (ordem crescente)</label>
+                    <input type="checkbox" id="tensSequencial" ${customParams.tensSequencial ? 'checked' : ''}>
                 </div>
             </div>
         `;
@@ -309,16 +352,22 @@
                 const fixed = document.getElementById('seqFixed');
                 const step = document.getElementById('seqStep');
                 const len = document.getElementById('seqLength');
+                const holes = document.getElementById('seqHoles');
                 const cnt = document.getElementById('seqCount');
                 if (fixed) fixed.addEventListener('change', (e) => customParams.seqFixed = e.target.checked);
                 if (step) step.addEventListener('change', (e) => customParams.seqStep = parseInt(e.target.value) || 1);
                 if (len) len.addEventListener('change', (e) => customParams.seqLength = parseInt(e.target.value) || 5);
+                if (holes) holes.addEventListener('change', (e) => customParams.seqHoles = parseInt(e.target.value) || 1);
                 if (cnt) cnt.addEventListener('change', (e) => customParams.seqCount = parseInt(e.target.value) || 4);
             }
             if (type === 'tens') {
-                const tens = document.getElementById('tensNumbers');
-                if (tens) tens.addEventListener('change', (e) => {
-                    customParams.tensNumbers = e.target.value.split(',').map(Number).filter(n => n >= 11 && n <= 19);
+                const dezena = document.getElementById('tensDezena');
+                const sequencial = document.getElementById('tensSequencial');
+                if (dezena) dezena.addEventListener('change', (e) => {
+                    customParams.tensDezena = parseInt(e.target.value) || 1;
+                });
+                if (sequencial) sequencial.addEventListener('change', (e) => {
+                    customParams.tensSequencial = e.target.checked;
                 });
             }
             if (type === 'compare') {
