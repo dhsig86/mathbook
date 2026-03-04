@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>KumonGen · Inglês</title>
+    <title>KumonGen · Matemática</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <style>
-        /* MESMOS ESTILOS DO PORTUGUÊS (adaptados) */
+        /* ESTILOS PADRÃO DO PREVIEW A4 */
         #a4-sheet {
             background: white;
             box-shadow: 0 10px 40px rgba(0,0,0,0.2);
@@ -151,7 +151,7 @@
         .tens-block.blue { background-color: #bfdbfe; }
         .tens-block.yellow { background-color: #fef08a; }
 
-        /* NOVOS ESTILOS PARA INTERFACE RESPONSIVA (idênticos ao português) */
+        /* ESTILOS RESPONSIVOS DA SIDEBAR E CONTROLES */
         .param-control {
             display: flex;
             flex-direction: column;
@@ -223,6 +223,7 @@
             background: white;
         }
 
+        /* Sidebar */
         aside {
             width: 100%;
             max-width: 320px;
@@ -230,20 +231,25 @@
             overflow-y: auto;
         }
 
+        /* Ajustes para telas pequenas */
         @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+                overflow-y: auto;
+            }
             aside {
                 max-width: 100%;
                 height: auto;
-                position: relative;
+                position: static;
             }
             main {
                 padding: 8px !important;
+                min-height: 400px;
             }
             #zoomContainer {
                 transform: none !important;
                 width: 100%;
-                display: flex;
-                justify-content: center;
+                height: auto;
             }
             #a4-sheet {
                 width: 100% !important;
@@ -251,18 +257,12 @@
                 aspect-ratio: 297 / 210;
             }
             .page {
-                padding: 10px 8px;
+                padding: 15px 11px;
             }
             .exercise-row {
-                height: 24px;
-                line-height: 24px;
-                font-size: 0.8rem;
-            }
-            .exercise-number {
-                width: 15px;
-            }
-            .answer-line {
-                min-width: 20px;
+                height: 28px;
+                line-height: 28px;
+                font-size: 0.9rem;
             }
         }
 
@@ -286,28 +286,31 @@
 </head>
 <body class="bg-slate-900 font-sans antialiased overflow-hidden h-screen flex flex-col md:flex-row">
 
-<!-- SIDEBAR COM GRADIENTE VERMELHO-AZUL -->
+<!-- SIDEBAR COM GRADIENTE AZUL E BRANCO -->
 <aside class="no-print w-full md:w-80 bg-white shadow-2xl flex flex-col z-20 text-slate-800 overflow-y-auto">
-    <div class="p-6 bg-gradient-to-br from-red-600 to-blue-600 text-white">
+    <div class="p-6 bg-gradient-to-br from-blue-600 to-blue-400 text-white">
         <h1 class="text-xl font-black flex items-center gap-2">
-            <i class="fas fa-language"></i> KUMON·ENG <span class="text-red-200 text-xs ml-1">v1</span>
+            <i class="fas fa-calculator"></i> KUMON·MAT <span class="text-blue-200 text-xs ml-1">v2</span>
         </h1>
-        <p class="text-[10px] uppercase tracking-widest font-bold opacity-80">inglês personalizável</p>
+        <p class="text-[10px] uppercase tracking-widest font-bold opacity-80">matemática personalizável</p>
     </div>
 
     <div class="flex-1 p-5 space-y-6">
-        <a href="index.html" class="text-xs text-red-600 hover:underline flex items-center gap-1"><i class="fas fa-arrow-left"></i> Início</a>
+        <!-- Link voltar -->
+        <a href="index.html" class="text-xs text-blue-600 hover:underline flex items-center gap-1"><i class="fas fa-arrow-left"></i> Início</a>
 
+        <!-- Níveis -->
         <div>
-            <label class="text-[10px] font-black text-slate-400 uppercase block mb-3">level</label>
+            <label class="text-[10px] font-black text-slate-400 uppercase block mb-3">nível</label>
             <div id="levelList" class="space-y-2 max-h-64 overflow-y-auto pr-1"></div>
         </div>
 
+        <!-- Visual / repetição -->
         <div>
             <label class="text-[10px] font-black text-slate-400 uppercase block mb-3">visual</label>
             <div class="bg-slate-50 p-3 rounded-xl space-y-3">
                 <div class="flex items-center justify-between">
-                    <span class="text-xs">lines/page</span>
+                    <span class="text-xs">linhas/página</span>
                     <select id="linesPerPage" class="border rounded px-2 py-1 text-xs">
                         <option value="6">6</option>
                         <option value="8" selected>8</option>
@@ -326,17 +329,19 @@
             </div>
         </div>
 
+        <!-- Parâmetros dinâmicos -->
         <div>
-            <label class="text-[10px] font-black text-slate-400 uppercase block mb-3">parameters</label>
+            <label class="text-[10px] font-black text-slate-400 uppercase block mb-3">parâmetros</label>
             <div id="paramPanel" class="bg-slate-50 p-3 rounded-xl min-h-[100px] text-xs"></div>
         </div>
 
+        <!-- Ações -->
         <div class="border-t border-slate-100 pt-4 space-y-2">
-            <button onclick="refreshPreview()" class="w-full flex items-center justify-center gap-2 bg-red-600 text-white p-3 rounded-xl hover:bg-red-700 font-bold text-sm shadow">
-                <i class="fas fa-sync-alt"></i> refresh preview
+            <button onclick="refreshPreview()" class="w-full flex items-center justify-center gap-2 bg-blue-600 text-white p-3 rounded-xl hover:bg-blue-700 font-bold text-sm shadow">
+                <i class="fas fa-sync-alt"></i> atualizar preview
             </button>
-            <button onclick="generatePDF()" class="w-full flex items-center justify-center gap-2 bg-blue-600 text-white p-4 rounded-xl hover:bg-blue-700 shadow-lg font-black text-sm">
-                <i class="fas fa-file-pdf"></i> GENERATE PDF
+            <button onclick="generatePDF()" class="w-full flex items-center justify-center gap-2 bg-blue-500 text-white p-4 rounded-xl hover:bg-blue-600 shadow-lg font-black text-sm">
+                <i class="fas fa-file-pdf"></i> GERAR PDF
             </button>
         </div>
         <div class="text-center text-[8px] text-slate-400 pt-4 border-t border-slate-100">
@@ -345,6 +350,7 @@
     </div>
 </aside>
 
+<!-- PREVIEW (A4 paisagem) -->
 <main class="flex-1 overflow-auto bg-[#0F172A] flex items-start justify-center p-8 no-print" id="previewContainer">
     <div id="zoomContainer" class="transition-transform duration-200 origin-top" style="transform:scale(0.7)">
         <div id="a4-sheet" class="bg-white shadow-2xl flex relative">
@@ -355,25 +361,33 @@
     </div>
 </main>
 
+<!-- Scripts -->
 <script src="gerador.js"></script>
-<script src="ingles.js"></script>
+<script src="matematica.js"></script>
+
 <script>
+    // Ajuste dinâmico da escala do preview para telas pequenas
     function adjustPreviewScale() {
         const container = document.getElementById('previewContainer');
-        const zoomContainer = document.getElementById('zoomContainer');
         const sheet = document.getElementById('a4-sheet');
-        if (!container || !zoomContainer || !sheet) return;
+        const zoomContainer = document.getElementById('zoomContainer');
+        if (!container || !sheet || !zoomContainer) return;
 
-        if (window.innerWidth <= 768) {
-            zoomContainer.style.transform = 'none';
-            return;
-        }
+        const containerWidth = container.clientWidth;
+        const containerHeight = container.clientHeight;
+        const sheetWidth = 1123; // px
+        const sheetHeight = 794;  // px
 
-        const currentZoom = parseFloat(document.getElementById('zoomValue').innerText) / 100;
-        zoomContainer.style.transform = `scale(${currentZoom})`;
+        const scaleX = containerWidth / sheetWidth;
+        const scaleY = containerHeight / sheetHeight;
+        const scale = Math.min(scaleX, scaleY, 1); // não ultrapassar 1
+
+        zoomContainer.style.transform = `scale(${scale})`;
     }
+
     window.addEventListener('resize', adjustPreviewScale);
-    window.addEventListener('load', adjustPreviewScale);
+    document.addEventListener('DOMContentLoaded', adjustPreviewScale);
 </script>
+
 </body>
 </html>
