@@ -9,7 +9,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <style>
-        /* MESMOS ESTILOS DO PORTUGUÊS */
+        /* MESMOS ESTILOS DO PORTUGUÊS (adaptados) */
         #a4-sheet {
             background: white;
             box-shadow: 0 10px 40px rgba(0,0,0,0.2);
@@ -151,7 +151,7 @@
         .tens-block.blue { background-color: #bfdbfe; }
         .tens-block.yellow { background-color: #fef08a; }
 
-        /* MESMOS ESTILOS RESPONSIVOS */
+        /* NOVOS ESTILOS PARA INTERFACE RESPONSIVA (idênticos ao português) */
         .param-control {
             display: flex;
             flex-direction: column;
@@ -240,11 +240,29 @@
                 padding: 8px !important;
             }
             #zoomContainer {
-                transform: scale(0.4) !important;
-                transform-origin: top left;
+                transform: none !important;
+                width: 100%;
+                display: flex;
+                justify-content: center;
+            }
+            #a4-sheet {
+                width: 100% !important;
+                height: auto !important;
+                aspect-ratio: 297 / 210;
             }
             .page {
-                padding: 15px 11px;
+                padding: 10px 8px;
+            }
+            .exercise-row {
+                height: 24px;
+                line-height: 24px;
+                font-size: 0.8rem;
+            }
+            .exercise-number {
+                width: 15px;
+            }
+            .answer-line {
+                min-width: 20px;
             }
         }
 
@@ -278,16 +296,13 @@
     </div>
 
     <div class="flex-1 p-5 space-y-6">
-        <!-- Link voltar -->
         <a href="index.html" class="text-xs text-red-600 hover:underline flex items-center gap-1"><i class="fas fa-arrow-left"></i> Início</a>
 
-        <!-- Níveis -->
         <div>
             <label class="text-[10px] font-black text-slate-400 uppercase block mb-3">level</label>
             <div id="levelList" class="space-y-2 max-h-64 overflow-y-auto pr-1"></div>
         </div>
 
-        <!-- Visual -->
         <div>
             <label class="text-[10px] font-black text-slate-400 uppercase block mb-3">visual</label>
             <div class="bg-slate-50 p-3 rounded-xl space-y-3">
@@ -311,13 +326,11 @@
             </div>
         </div>
 
-        <!-- Parâmetros -->
         <div>
             <label class="text-[10px] font-black text-slate-400 uppercase block mb-3">parameters</label>
             <div id="paramPanel" class="bg-slate-50 p-3 rounded-xl min-h-[100px] text-xs"></div>
         </div>
 
-        <!-- Ações -->
         <div class="border-t border-slate-100 pt-4 space-y-2">
             <button onclick="refreshPreview()" class="w-full flex items-center justify-center gap-2 bg-red-600 text-white p-3 rounded-xl hover:bg-red-700 font-bold text-sm shadow">
                 <i class="fas fa-sync-alt"></i> refresh preview
@@ -332,7 +345,6 @@
     </div>
 </aside>
 
-<!-- PREVIEW -->
 <main class="flex-1 overflow-auto bg-[#0F172A] flex items-start justify-center p-8 no-print" id="previewContainer">
     <div id="zoomContainer" class="transition-transform duration-200 origin-top" style="transform:scale(0.7)">
         <div id="a4-sheet" class="bg-white shadow-2xl flex relative">
@@ -345,6 +357,23 @@
 
 <script src="gerador.js"></script>
 <script src="ingles.js"></script>
+<script>
+    function adjustPreviewScale() {
+        const container = document.getElementById('previewContainer');
+        const zoomContainer = document.getElementById('zoomContainer');
+        const sheet = document.getElementById('a4-sheet');
+        if (!container || !zoomContainer || !sheet) return;
 
+        if (window.innerWidth <= 768) {
+            zoomContainer.style.transform = 'none';
+            return;
+        }
+
+        const currentZoom = parseFloat(document.getElementById('zoomValue').innerText) / 100;
+        zoomContainer.style.transform = `scale(${currentZoom})`;
+    }
+    window.addEventListener('resize', adjustPreviewScale);
+    window.addEventListener('load', adjustPreviewScale);
+</script>
 </body>
 </html>
