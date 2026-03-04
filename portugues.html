@@ -231,6 +231,7 @@
             overflow-y: auto;
         }
 
+        /* Responsividade aprimorada */
         @media (max-width: 768px) {
             aside {
                 max-width: 100%;
@@ -241,11 +242,29 @@
                 padding: 8px !important;
             }
             #zoomContainer {
-                transform: scale(0.4) !important;
-                transform-origin: top left;
+                transform: none !important;
+                width: 100%;
+                display: flex;
+                justify-content: center;
+            }
+            #a4-sheet {
+                width: 100% !important;
+                height: auto !important;
+                aspect-ratio: 297 / 210;
             }
             .page {
-                padding: 15px 11px;
+                padding: 10px 8px;
+            }
+            .exercise-row {
+                height: 24px;
+                line-height: 24px;
+                font-size: 0.8rem;
+            }
+            .exercise-number {
+                width: 15px;
+            }
+            .answer-line {
+                min-width: 20px;
             }
         }
 
@@ -347,6 +366,28 @@
 <!-- Scripts -->
 <script src="gerador.js"></script>
 <script src="portugues.js"></script>
+<script>
+    // Função para ajustar a escala do preview em telas pequenas
+    function adjustPreviewScale() {
+        const container = document.getElementById('previewContainer');
+        const zoomContainer = document.getElementById('zoomContainer');
+        const sheet = document.getElementById('a4-sheet');
+        if (!container || !zoomContainer || !sheet) return;
 
+        // Em telas muito pequenas, remove a escala fixa e deixa o CSS cuidar
+        if (window.innerWidth <= 768) {
+            zoomContainer.style.transform = 'none';
+            return;
+        }
+
+        // Em telas maiores, aplica a escala configurada pelo usuário
+        const currentZoom = parseFloat(document.getElementById('zoomValue').innerText) / 100;
+        zoomContainer.style.transform = `scale(${currentZoom})`;
+    }
+
+    // Chamar no resize e no load
+    window.addEventListener('resize', adjustPreviewScale);
+    window.addEventListener('load', adjustPreviewScale);
+</script>
 </body>
 </html>
